@@ -11,12 +11,12 @@ export function generateEmail (): string {
   return `${username}@example.com`;
 }
 
-export async function createUser(request: APIRequestContext): Promise<User> {
+export async function createUser(request: APIRequestContext, password: string = 'Passw0rd!'): Promise<User> {
   const username = `user${Date.now()}${Math.floor(Math.random() * 1000)}`;
   const user: User = {
     username,
     email: generateEmail(),
-    password: 'Passw0rd!',
+    password,
   };
   const response = await request.post('/api/users', { data: { user } });
   expect(response.ok(), 'user should be created via API').toBeTruthy();

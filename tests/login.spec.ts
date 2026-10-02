@@ -12,7 +12,7 @@ test.describe('Login', () => {
 
   // Each test gets its own fresh user, created via API (fast, no UI clicks)
   test.beforeEach(async ({ page, request }) => {
-    user = await createUser(request);
+    user = await createUser(request, 'MyOwnPassword123456789!'); // Create a new user via API
     loginPage = new LoginPage(page);
     navbar = new Navbar(page);
     await loginPage.open();
@@ -51,10 +51,37 @@ test.describe('Login', () => {
     await loginPage.fillEmail(user.email);
     await loginPage.submitButton.click();
 
-const isMissing = await loginPage.passwordInput.evaluate(
+    const isMissing = await loginPage.passwordInput.evaluate(
       (input: HTMLInputElement) => input.validity.valueMissing,
     );
     expect(isMissing).toBe(true);
     await expect(page).toHaveURL(/\/#\/login$/);
+  });
+
+  test('Keeps user logged in after page reload', async ({ page }) => {
+    await loginPage.login(user.email, user.password);
+    await expect(page).toHaveURL(/\/#\/$/);
+
+    await page.reload();
+    await expect(page).toHaveURL(/\/#\/$/);
+    await expect(navbar.newArticleLink).toBeVisible();
+    await expect(navbar.userMenu).toHaveText(user.username);
+  });
+
+  test('user can log out', async ({ page }) => {
+    await loginPage.login(user.email, user.password);
+    await expect(page).toHaveURL(/\/#\/$/);
+
+    await navbar.logout();
+    await expect(page).toHaveURL(/\/#\/$/);
+    await expect(navbar.loginLink).toBeVisible();
+    await expect(navbar.signUpLink).toBeVisible();
+    await expect(navbar.newArticleLink).not.toBeVisible();
+
+    await page.reload();
+    await expect(page).toHaveURL(/\/#\/$/);
+    await expect(navbar.loginLink).toBeVisible();
+    await expect(navbar.signUpLink).toBeVisible();
+    await expect(navbar.newArticleLink).not.toBeVisible();
   });
 }); 
