@@ -1,33 +1,19 @@
-import { test, expect } from '@playwright/test';
-import { createUser, generateEmail, type User } from '../helpers/api';
-import { LoginPage } from '../pages/LoginPage';
-import { Navbar } from '../pages/Navbar';
-
-
+import { test, expect } from '../fixtures';
+import { generateEmail } from '../helpers/api';
 
 test.describe('Login', () => {
-  let user: User;
-  let loginPage: LoginPage;
-  let navbar: Navbar;
-
-  // Each test gets its own fresh user, created via API (fast, no UI clicks)
-  test.beforeEach(async ({ page, request }) => {
-    user = await createUser(request, 'MyOwnPassword123456789!'); // Create a new user via API
-    loginPage = new LoginPage(page);
-    navbar = new Navbar(page);
+  test.beforeEach(async ({ loginPage }) => {
     await loginPage.open();
   });
 
-  test('user can log in with valid credentials', async ({ page }) => {
-
+  test('user can log in with valid credentials', async ({ page, navbar, user, loginPage }) => {
     await loginPage.login(user.email, user.password);
     await expect(page).toHaveURL(/\/#\/$/);
     await expect(navbar.newArticleLink).toBeVisible();
     await expect(navbar.userMenu).toHaveText(user.username);
   });
 
-  test('shows error for wrong password', async ({ page }) => {
-
+  test('shows error for wrong password', async ({ page, loginPage, user }) => {
     await loginPage.login(user.email, 'WrongPass1');
 
     await expect(loginPage.errorMessage).toBeVisible();
@@ -35,10 +21,8 @@ test.describe('Login', () => {
     await expect(page).toHaveURL(/\/#\/login$/);
   });
 
-  test('shows error for unknown email', async ({ page }) => {
-
+  test('shows error for unknown email', async ({ page, loginPage, user }) => {
     test.fail(true, 'BUG: different error for unknown email reveals registered emails (user enumeration)');
-
 
     await loginPage.login(generateEmail(), user.password);
 
@@ -47,8 +31,8 @@ test.describe('Login', () => {
     await expect(page).toHaveURL(/\/#\/login$/);
   });
 
-  test('empty password cannot be sent', async ({ page }) => {
-    await loginPage.fillEmail(user.email);
+  test('empty password cannot be sent', async ({ page, loginPage }) => {
+    await loginPage.fillEmail(generateEmail());
     await loginPage.submitButton.click();
 
     const isMissing = await loginPage.passwordInput.evaluate(
@@ -58,7 +42,7 @@ test.describe('Login', () => {
     await expect(page).toHaveURL(/\/#\/login$/);
   });
 
-  test('Keeps user logged in after page reload', async ({ page }) => {
+  test('keeps user logged in after page reload', async ({ page, user, loginPage, navbar }) => {
     await loginPage.login(user.email, user.password);
     await expect(page).toHaveURL(/\/#\/$/);
 
@@ -68,20 +52,25 @@ test.describe('Login', () => {
     await expect(navbar.userMenu).toHaveText(user.username);
   });
 
-  test('user can log out', async ({ page }) => {
+  test('user can log out', async ({ page, loginPage, navbar, user }) => {
+    
+    await test.step('login', async () => {
     await loginPage.login(user.email, user.password);
     await expect(page).toHaveURL(/\/#\/$/);
-
+    });
+    await test.step('logout', async () => {
     await navbar.logout();
     await expect(page).toHaveURL(/\/#\/$/);
     await expect(navbar.loginLink).toBeVisible();
     await expect(navbar.signUpLink).toBeVisible();
     await expect(navbar.newArticleLink).not.toBeVisible();
-
+    });
+    await test.step('reload', async () => {
     await page.reload();
     await expect(page).toHaveURL(/\/#\/$/);
     await expect(navbar.loginLink).toBeVisible();
     await expect(navbar.signUpLink).toBeVisible();
     await expect(navbar.newArticleLink).not.toBeVisible();
+    });
   });
-}); 
+});
