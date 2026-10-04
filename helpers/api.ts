@@ -6,7 +6,7 @@ export type User = {
   password: string;
 };
 
-export function generateEmail (): string {
+export function generateEmail(): string {
   const username = `user${Date.now()}${Math.floor(Math.random() * 1000)}`;
   return `${username}@example.com`;
 }
@@ -21,7 +21,4 @@ export async function createUser(request: APIRequestContext, password: string = 
   const response = await request.post('/api/users', { data: { user } });
   expect(response.ok(), 'user should be created via API').toBeTruthy();
   return user;
-
 }
-
-
