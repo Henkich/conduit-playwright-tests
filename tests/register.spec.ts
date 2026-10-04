@@ -1,7 +1,10 @@
 import { test, expect } from '../fixtures';
 import { generateEmail } from '../helpers/api';
+import { GUEST } from '../helpers/auth';
 
 test.describe('Register', () => {
+  test.use({ storageState: GUEST });
+
   test.beforeEach(async ({ registerPage }) => {
     await registerPage.open();
   });

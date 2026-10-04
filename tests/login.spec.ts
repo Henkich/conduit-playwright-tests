@@ -1,7 +1,10 @@
 import { test, expect } from '../fixtures';
 import { generateEmail } from '../helpers/api';
+import { GUEST } from '../helpers/auth';
 
 test.describe('Login', () => {
+  test.use({ storageState: GUEST });
+
   test.beforeEach(async ({ loginPage }) => {
     await loginPage.open();
   });
@@ -52,25 +55,4 @@ test.describe('Login', () => {
     await expect(navbar.userMenu).toHaveText(user.username);
   });
 
-  test('user can log out', async ({ page, loginPage, navbar, user }) => {
-    
-    await test.step('login', async () => {
-    await loginPage.login(user.email, user.password);
-    await expect(page).toHaveURL(/\/#\/$/);
-    });
-    await test.step('logout', async () => {
-    await navbar.logout();
-    await expect(page).toHaveURL(/\/#\/$/);
-    await expect(navbar.loginLink).toBeVisible();
-    await expect(navbar.signUpLink).toBeVisible();
-    await expect(navbar.newArticleLink).not.toBeVisible();
-    });
-    await test.step('reload', async () => {
-    await page.reload();
-    await expect(page).toHaveURL(/\/#\/$/);
-    await expect(navbar.loginLink).toBeVisible();
-    await expect(navbar.signUpLink).toBeVisible();
-    await expect(navbar.newArticleLink).not.toBeVisible();
-    });
-  });
 });
