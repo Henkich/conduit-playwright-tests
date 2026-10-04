@@ -18,7 +18,7 @@ export class LoginPage {
     this.errorMessage = page.locator('.error-messages');
     this.signUpLink = page.getByRole('link', { name: 'Need an account?' });
   }
-  
+
   async open() {
     await this.page.goto('/#/login');
   }
@@ -29,7 +29,7 @@ export class LoginPage {
     await this.submitButton.click();
   }
 
-  async fillEmail (email: string) {
+  async fillEmail(email: string) {
     await this.emailInput.fill(email);
   }
 }
