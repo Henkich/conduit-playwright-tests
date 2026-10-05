@@ -1,24 +1,60 @@
 name: Playwright Tests
+
 on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
+
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout tests
+        uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: 22
+          cache: npm
+
       - name: Install dependencies
         run: npm ci
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-      - name: Run Playwright tests
-        run: npx playwright test
-      - uses: actions/upload-artifact@v4
+
+      # Runs before the app checkout so Prettier/ESLint don't scan conduit-app
+      - name: Check code quality
+        run: npm run check
+
+      - name: Checkout Conduit app
+        uses: actions/checkout@v4
+        with:
+          repository: Henkich/conduit-app
+          path: conduit-app
+
+      # Throwaway CI database, so the example secrets are fine here
+      - name: Start Conduit
+        working-directory: conduit-app
+        run: |
+          cp .env.example .env
+          docker compose up -d --build --wait
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run tests
+        run: npm test
+
+      - name: Upload report
         if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: playwright-report/
-          retention-days: 30
+          retention-days: 14
+
+      - name: Show app logs on failure
+        if: failure()
+        working-directory: conduit-app
+        run: docker compose logs
