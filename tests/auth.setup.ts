@@ -1,3 +1,4 @@
+// auth setup for tests that require an authenticated user
 import { test as setup, expect } from '../fixtures';
 import { AUTH_FILE } from '../helpers/auth';
 
