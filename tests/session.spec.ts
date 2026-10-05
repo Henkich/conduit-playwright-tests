@@ -9,19 +9,21 @@ test.describe('Session', () => {
       await page.goto('/#/');
       await expect(navbar.newArticleLink).toBeVisible();
     });
+
     await test.step('logout', async () => {
       await navbar.logout();
       await expect(page).toHaveURL(/\/#\/$/);
       await expect(navbar.loginLink).toBeVisible();
       await expect(navbar.signUpLink).toBeVisible();
-      await expect(navbar.newArticleLink).not.toBeVisible();
+      await expect(navbar.newArticleLink).toBeHidden();
     });
+
     await test.step('reload', async () => {
       await page.reload();
       await expect(page).toHaveURL(/\/#\/$/);
       await expect(navbar.loginLink).toBeVisible();
       await expect(navbar.signUpLink).toBeVisible();
-      await expect(navbar.newArticleLink).not.toBeVisible();
+      await expect(navbar.newArticleLink).toBeHidden();
     });
   });
 });
