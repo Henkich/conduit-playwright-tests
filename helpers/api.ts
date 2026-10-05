@@ -11,7 +11,10 @@ export function generateEmail(): string {
   return `${username}@example.com`;
 }
 
-export async function createUser(request: APIRequestContext, password: string = 'Passw0rd!'): Promise<User> {
+export async function createUser(
+  request: APIRequestContext,
+  password: string = 'Passw0rd!',
+): Promise<User> {
   const username = `user${Date.now()}${Math.floor(Math.random() * 1000)}`;
   const user: User = {
     username,

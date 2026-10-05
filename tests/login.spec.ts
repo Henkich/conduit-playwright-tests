@@ -25,7 +25,10 @@ test.describe('Login', () => {
   });
 
   test('shows error for unknown email', async ({ page, loginPage, user }) => {
-    test.fail(true, 'BUG: different error for unknown email reveals registered emails (user enumeration)');
+    test.fail(
+      true,
+      'BUG: different error for unknown email reveals registered emails (user enumeration)',
+    );
 
     await loginPage.login(generateEmail(), user.password);
 
@@ -54,5 +57,4 @@ test.describe('Login', () => {
     await expect(navbar.newArticleLink).toBeVisible();
     await expect(navbar.userMenu).toHaveText(user.username);
   });
-
 });
