@@ -1,6 +1,6 @@
 // Login tests
 import { test, expect } from '../fixtures';
-import { generateEmail } from '../helpers/api';
+import { generateEmail } from '../helpers/data';
 import { GUEST } from '../helpers/auth';
 
 test.describe('Login', () => {

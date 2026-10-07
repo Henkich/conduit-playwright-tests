@@ -1,4 +1,5 @@
 import { expect, type APIRequestContext } from '@playwright/test';
+import { uniqueId, generateEmail } from './data';
 
 export type User = {
   username: string;
@@ -6,16 +7,11 @@ export type User = {
   password: string;
 };
 
-export function generateEmail(): string {
-  const username = `user${Date.now()}${Math.floor(Math.random() * 1000)}`;
-  return `${username}@example.com`;
-}
-
 export async function createUser(
   request: APIRequestContext,
   password: string = 'Passw0rd!',
 ): Promise<User> {
-  const username = `user${Date.now()}${Math.floor(Math.random() * 1000)}`;
+  const username = `user${uniqueId()}`;
   const user: User = {
     username,
     email: generateEmail(),
