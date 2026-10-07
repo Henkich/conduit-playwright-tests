@@ -3,12 +3,14 @@ import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { Navbar } from '../pages/Navbar';
 import { createUser, type User } from '../helpers/api';
+import { EditorPage } from '../pages/EditorPage';
 
 type Fixtures = {
   loginPage: LoginPage;
   registerPage: RegisterPage;
   navbar: Navbar;
   user: User;
+  editorPage: EditorPage;
 };
 
 export const test = base.extend<Fixtures>({
@@ -20,6 +22,9 @@ export const test = base.extend<Fixtures>({
   },
   navbar: async ({ page }, use) => {
     await use(new Navbar(page));
+  },
+  editorPage: async ({ page }, use) => {
+    await use(new EditorPage(page));
   },
   // Each test gets its own fresh user, created via API (fast, no UI clicks) when user is used
   user: async ({ request }, use) => {
