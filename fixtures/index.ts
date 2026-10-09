@@ -4,7 +4,7 @@ import { RegisterPage } from '../pages/RegisterPage';
 import { Navbar } from '../pages/Navbar';
 import { createUser, type User } from '../helpers/api';
 import { EditorPage } from '../pages/EditorPage';
-import { MyArticlePage } from '../pages/MyArticlePage';
+import { ArticlePage } from '../pages/ArticlePage';
 
 type Fixtures = {
   loginPage: LoginPage;
@@ -12,7 +12,7 @@ type Fixtures = {
   navbar: Navbar;
   user: User;
   editorPage: EditorPage;
-  myArticlePage: MyArticlePage;
+  articlePage: ArticlePage;
 };
 
 export const test = base.extend<Fixtures>({
@@ -28,8 +28,8 @@ export const test = base.extend<Fixtures>({
   editorPage: async ({ page }, use) => {
     await use(new EditorPage(page));
   },
-  myArticlePage: async ({ page }, use) => {
-    await use(new MyArticlePage(page));
+  articlePage: async ({ page }, use) => {
+    await use(new ArticlePage(page));
   },
   // Each test gets its own fresh user, created via API (fast, no UI clicks) when user is used
   user: async ({ request }, use) => {
