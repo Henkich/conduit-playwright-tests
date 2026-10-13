@@ -2,8 +2,10 @@ import { test as base } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { Navbar } from '../pages/Navbar';
-import { createUser, type User } from '../helpers/api';
+import { createArticle, createUser, type User, type Article } from '../helpers/api';
 import { EditorPage } from '../pages/EditorPage';
+import { ArticlePage } from '../pages/ArticlePage';
+import { getAuthToken } from '../helpers/auth';
 
 type Fixtures = {
   loginPage: LoginPage;
@@ -11,6 +13,8 @@ type Fixtures = {
   navbar: Navbar;
   user: User;
   editorPage: EditorPage;
+  articlePage: ArticlePage;
+  myArticle: Article;
 };
 
 export const test = base.extend<Fixtures>({
@@ -26,10 +30,18 @@ export const test = base.extend<Fixtures>({
   editorPage: async ({ page }, use) => {
     await use(new EditorPage(page));
   },
+  articlePage: async ({ page }, use) => {
+    await use(new ArticlePage(page));
+  },
+
   // Each test gets its own fresh user, created via API (fast, no UI clicks) when user is used
   user: async ({ request }, use) => {
     const user = await createUser(request);
     await use(user);
+  },
+  myArticle: async ({ request }, use) => {
+    const article = await createArticle(request, getAuthToken());
+    await use(article);
   },
 });
 
