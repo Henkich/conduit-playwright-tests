@@ -17,13 +17,14 @@ The application under test lives in a separate repository and runs locally in Do
 
 ## What is covered
 
-| Area     | Scenarios                                                                                             |
-| -------- | ----------------------------------------------------------------------------------------------------- |
-| Login    | valid login, wrong password, unknown email, empty password (native validation)                        |
-| Session  | session survives page reload, logout clears the session                                               |
-| Register | successful sign-up, already registered email                                                          |
-| Home     | logo and global feed are shown                                                                        |
-| Articles | editor form, publish with/without tags, empty title, duplicate title, non-latin title, guest redirect |
+| Area        | Scenarios                                                                                                                 |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Login       | valid login, wrong password, unknown email, empty password (native validation)                                            |
+| Session     | session survives page reload, logout clears the session                                                                   |
+| Register    | successful sign-up, already registered email                                                                              |
+| Home        | logo and global feed are shown                                                                                            |
+| Articles    | editor form, publish with/without tags, empty title, duplicate title, non-latin title, guest redirect                     |
+| Own article | title, body and author buttons, delete (confirm accepted), cancel delete (confirm dismissed), edit opens prefilled editor |
 
 ### Known application bugs
 
@@ -84,7 +85,7 @@ npm test
 tests/          test specs; auth.setup.ts logs in once and saves storageState
 pages/          Page Objects: locators and user actions, no assertions
 fixtures/       custom fixtures: page objects and a fresh API-created user per test
-helpers/        API helpers (createUser), test data generators, auth state constants (AUTH_FILE, GUEST)
+helpers/        API helpers (createUser, createArticle), test data generators, auth state (AUTH_FILE, GUEST, getAuthToken)
 .github/        CI workflow
 ```
 
