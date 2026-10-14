@@ -1,6 +1,6 @@
 import { test, expect } from '../fixtures';
 import { createArticle } from '../helpers/api';
-import { AUTH_FILE } from '../helpers/auth';
+import { AUTH_FILE, GUEST } from '../helpers/auth';
 
 test.describe('MyArticle', () => {
   test.use({ storageState: AUTH_FILE });
@@ -150,5 +150,55 @@ test.describe('Another Author Article', () => {
     await page.reload();
     await expect(articlePage.favoriteButton).toContainText(' 0 ');
     await expect(articlePage.favoriteButton).not.toHaveClass(/active/);
+  });
+});
+
+test.describe('Article for Guest', () => {
+  test.use({ storageState: GUEST });
+
+  test('Article page for Guest', async ({ page, user, articlePage, request }) => {
+    const article = await createArticle(request, user.token);
+    await articlePage.open(article.slug);
+
+    await expect(page).toHaveURL(`/#/article/${article.slug}`);
+
+    await expect(articlePage.title).toContainText(`${article.title}`);
+    await expect(articlePage.body).toContainText(`${article.body}`);
+    await expect(articlePage.postCommentButton).toBeHidden();
+    await expect(articlePage.commentInput).toBeHidden();
+    await expect(articlePage.editArticleButton).toBeHidden();
+    await expect(articlePage.deleteArticleButton).toBeHidden();
+    await expect(articlePage.favoriteButton).toContainText(' 0 ');
+    await expect(articlePage.favoriteButton).not.toHaveClass(/active/);
+    await expect(articlePage.followButton).toContainText('Followers ( 0 )');
+    await expect(articlePage.guestText).toBeVisible();
+  });
+
+  test('Guest cannot follow', async ({ page, user, articlePage, request }) => {
+    const article = await createArticle(request, user.token);
+    await articlePage.open(article.slug);
+    await expect(articlePage.title).toContainText(article.title);
+
+    page.once('dialog', async (dialog) => {
+      expect(dialog.message()).toBe('You need to login first');
+      await dialog.accept();
+    });
+    await articlePage.followButton.click();
+
+    await expect(articlePage.followButton).toContainText(' Followers ( 0 ) ');
+  });
+
+  test('Guest cannot add to Favorite', async ({ page, user, articlePage, request }) => {
+    const article = await createArticle(request, user.token);
+    await articlePage.open(article.slug);
+    await expect(articlePage.title).toContainText(article.title);
+
+    page.once('dialog', async (dialog) => {
+      expect(dialog.message()).toBe('You need to login first');
+      await dialog.accept();
+    });
+    await articlePage.favoriteButton.click();
+
+    await expect(articlePage.favoriteButton).toContainText('( 0 )');
   });
 });
