@@ -11,6 +11,7 @@ export type User = {
   username: string;
   email: string;
   password: string;
+  token: string;
 };
 export type Article = {
   title: string;
@@ -39,12 +40,13 @@ export async function createUser(
   password: string = 'Passw0rd!',
 ): Promise<User> {
   const username = `user${uniqueId()}`;
-  const user: User = {
+  const user = {
     username,
     email: generateEmail(),
     password,
   };
   const response = await request.post('/api/users', { data: { user } });
   expect(response.ok(), 'user should be created via API').toBeTruthy();
-  return user;
+  const json = await response.json();
+  return { ...user, token: json.user.token };
 }

@@ -17,14 +17,16 @@ The application under test lives in a separate repository and runs locally in Do
 
 ## What is covered
 
-| Area        | Scenarios                                                                                                                 |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Login       | valid login, wrong password, unknown email, empty password (native validation)                                            |
-| Session     | session survives page reload, logout clears the session                                                                   |
-| Register    | successful sign-up, already registered email                                                                              |
-| Home        | logo and global feed are shown                                                                                            |
-| Articles    | editor form, publish with/without tags, empty title, duplicate title, non-latin title, guest redirect                     |
-| Own article | title, body and author buttons, delete (confirm accepted), cancel delete (confirm dismissed), edit opens prefilled editor |
+| Area         | Scenarios                                                                                                                  |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Login        | valid login, wrong password, unknown email, empty password (native validation)                                             |
+| Session      | session survives page reload, logout clears the session                                                                    |
+| Register     | successful sign-up, already registered email                                                                               |
+| Home         | logo and global feed are shown                                                                                             |
+| Articles     | editor form, publish with/without tags, empty title, duplicate title, non-latin title, guest redirect                      |
+| Own article  | title, body and author buttons, delete (confirm accepted), cancel delete (confirm dismissed), edit opens prefilled editor  |
+| Other author | follow and favorite instead of edit and delete, follow/unfollow author, favorite/unfavorite article, state survives reload |
+| Guest        | article without author buttons, sign-in prompt for comments, follow/favorite ask to log in                                 |
 
 ### Known application bugs
 
