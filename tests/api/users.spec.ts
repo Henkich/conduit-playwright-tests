@@ -48,3 +48,60 @@ test.describe('POST /api/users/login', () => {
     });
   });
 });
+
+test.describe('GET /api/user', () => {
+  test('Return loggined user', async ({ request, user }) => {
+    const response = await request.get('/api/user', {
+      headers: { Authorization: `Token ${user.token}` },
+    });
+
+    expect(response.status()).toBe(200);
+    const json = await response.json();
+
+    expect(json).toEqual({
+      user: {
+        username: user.username,
+        email: user.email,
+        token: expect.any(String),
+        bio: null,
+        image: null,
+      },
+    });
+  });
+
+  test('Return user with unloggined user', async ({ request }) => {
+    const response = await request.get('/api/user', {});
+
+    expect(response.status()).toBe(401);
+    const json = await response.json();
+
+    expect(json).toEqual({
+      errors: {
+        body: ['You need to login first!'],
+      },
+    });
+  });
+
+  test('Return user with unknown token', async ({ request }) => {
+    test.fail(true, '500 response code instead of 401');
+    const response = await request.get('/api/user', {
+      headers: { Authorization: `Token 345gj03430f304v3408g034f34f34yg34f34` },
+    });
+
+    expect(response.status()).toBe(401);
+    const json = await response.json();
+
+    expect(json.errors).toBeDefined();
+  });
+
+  test('Return user with monotoken', async ({ request, user }) => {
+    test.fail(true, '500 error insead of 401');
+    const response = await request.get('/api/user', {
+      headers: { Authorization: `Token${user.token}` },
+    });
+
+    expect(response.status()).toBe(401);
+    const json = await response.json();
+    expect(json.errors).toBeDefined();
+  });
+});
