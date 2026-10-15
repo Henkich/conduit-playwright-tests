@@ -28,6 +28,19 @@ The application under test lives in a separate repository and runs locally in Do
 | Other author | follow and favorite instead of edit and delete, follow/unfollow author, favorite/unfavorite article, state survives reload |
 | Guest        | article without author buttons, sign-in prompt for comments, follow/favorite ask to log in                                 |
 
+### API
+
+API tests (`tests/api/`) run without a browser against the backend and check responses against the
+[RealWorld OpenAPI spec](docs/realworld-openapi.yml): status codes, the response shape and that
+returned data is usable (e.g. a fresh token works for `GET /api/user`).
+
+| Endpoint                | Scenarios                                                             |
+| ----------------------- | --------------------------------------------------------------------- |
+| `POST /api/users/login` | valid credentials, wrong password, unknown email                      |
+| `POST /api/users`       | sign-up, taken email, taken username, empty password                  |
+| `GET /api/user`         | valid token, no token, forged token, malformed `Authorization` header |
+| `PUT /api/user`         | update bio and image, update username, no token                       |
+
 ### Known application bugs
 
 Tests describe the **expected** behaviour. A test that fails because of an application bug is
@@ -39,6 +52,12 @@ visible in the report:
 - **Non-latin titles collide in the slug**: every non-latin character becomes `-`, so different
   Cyrillic titles of the same length get the same slug and the second one is rejected as
   "Title already exists".
+- **API differs from the spec**: wrong login credentials return 422 instead of 401, a taken email
+  returns 422 instead of 409, and an invalid or malformed token returns 500 instead of 401.
+- **Duplicate usernames are allowed**: sign-up checks only the email, so two users can share a
+  username, while profiles and follows are looked up by username.
+- **Updating a user without a password returns 500**: the password check uses `||` instead of
+  `&&`, so the server always tries to hash a password. The update response also has no `email`.
 
 ## Getting started
 
@@ -73,8 +92,9 @@ npm test
 
 | Command             | What it does                                    |
 | ------------------- | ----------------------------------------------- |
-| `npm test`          | run all tests (setup project + chromium)        |
+| `npm test`          | run all tests (setup + chromium + api)          |
 | `npm run test:ui`   | open Playwright UI mode                         |
+| `npm run test:api`  | run only API tests                              |
 | `npm run report`    | open the HTML report of the last run            |
 | `npm run check`     | Prettier check + ESLint + TypeScript type check |
 | `npm run format`    | format all files with Prettier                  |
@@ -84,7 +104,9 @@ npm test
 ## Project structure
 
 ```
-tests/          test specs; auth.setup.ts logs in once and saves storageState
+tests/          UI specs; auth.setup.ts logs in once and saves storageState
+tests/api/      API specs (no browser)
+docs/           RealWorld OpenAPI spec used as the API contract
 pages/          Page Objects: locators and user actions, no assertions
 fixtures/       custom fixtures: page objects and a fresh API-created user per test
 helpers/        API helpers (createUser, createArticle), test data generators, auth state (AUTH_FILE, GUEST, getAuthToken)

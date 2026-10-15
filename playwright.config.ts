@@ -38,8 +38,15 @@ export default defineConfig({
     },
     {
       name: 'chromium',
+      testIgnore: /api\//,
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['setup'],
+    },
+    // API tests: no browser, requests go straight to the backend
+    {
+      name: 'api',
+      testMatch: /api\/.*\.spec\.ts/,
+      use: { baseURL: process.env.API_URL ?? 'http://localhost:3001' },
     },
     /*
     {

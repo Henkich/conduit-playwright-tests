@@ -21,3 +21,7 @@ export function generateEmail(): string {
   const username = `user${uniqueId()}`;
   return `${username}@example.com`;
 }
+export function generateUsername(): string {
+  const username = `user${uniqueId()}`;
+  return username;
+}
