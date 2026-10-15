@@ -2,10 +2,10 @@
 
 [![Playwright Tests](https://github.com/Henkich/conduit-playwright-tests/actions/workflows/playwright.yml/badge.svg)](https://github.com/Henkich/conduit-playwright-tests/actions/workflows/playwright.yml)
 
-End-to-end UI tests for [Conduit](https://github.com/Henkich/conduit-app), a RealWorld
+UI and API tests for [Conduit](https://github.com/Henkich/conduit-app), a RealWorld
 Medium clone (React + Express + PostgreSQL), written with Playwright and TypeScript.
-
-The application under test lives in a separate repository and runs locally in Docker.
+A learning project. The application under test lives in a separate repository and runs
+locally in Docker.
 
 ## Tech stack
 
@@ -13,9 +13,12 @@ The application under test lives in a separate repository and runs locally in Do
 - Page Object Model and custom Playwright fixtures
 - Authentication via `storageState` (log in once in a setup project)
 - Prettier, ESLint (`eslint-plugin-playwright`), `tsc` type checking
+- API tests in a separate Playwright project, checked against the RealWorld OpenAPI spec
 - GitHub Actions: on every pull request the app is started in Docker and the full suite runs
 
 ## What is covered
+
+### UI
 
 | Area         | Scenarios                                                                                                                  |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------- |
@@ -30,9 +33,8 @@ The application under test lives in a separate repository and runs locally in Do
 
 ### API
 
-API tests (`tests/api/`) run without a browser against the backend and check responses against the
-[RealWorld OpenAPI spec](docs/realworld-openapi.yml): status codes, the response shape and that
-returned data is usable (e.g. a fresh token works for `GET /api/user`).
+Requests go straight to the backend, no browser. Responses are checked against the
+[RealWorld OpenAPI spec](docs/realworld-openapi.yml): status code and response shape.
 
 | Endpoint                | Scenarios                                                             |
 | ----------------------- | --------------------------------------------------------------------- |
@@ -41,11 +43,10 @@ returned data is usable (e.g. a fresh token works for `GET /api/user`).
 | `GET /api/user`         | valid token, no token, forged token, malformed `Authorization` header |
 | `PUT /api/user`         | update bio and image, update username, no token                       |
 
-### Known application bugs
+## Known application bugs
 
 Tests describe the **expected** behaviour. A test that fails because of an application bug is
-marked with `test.fail()` and a short description, so the suite stays green and the bug stays
-visible in the report:
+marked with `test.fail()`, so the suite stays green and the bug stays visible in the report:
 
 - **User enumeration on login**: an unknown email shows "Email not found", while a wrong password
   shows "Wrong email/password combination". Both cases should return the same message.
@@ -84,7 +85,7 @@ git clone https://github.com/Henkich/conduit-playwright-tests.git
 cd conduit-playwright-tests
 npm ci
 npx playwright install chromium
-cp .env.example .env          # BASE_URL, defaults to http://localhost:3000
+cp .env.example .env          # BASE_URL (UI) and API_URL (API tests)
 npm test
 ```
 
@@ -108,12 +109,12 @@ tests/          UI specs; auth.setup.ts logs in once and saves storageState
 tests/api/      API specs (no browser)
 docs/           RealWorld OpenAPI spec used as the API contract
 pages/          Page Objects: locators and user actions, no assertions
-fixtures/       custom fixtures: page objects and a fresh API-created user per test
-helpers/        API helpers (createUser, createArticle), test data generators, auth state (AUTH_FILE, GUEST, getAuthToken)
+fixtures/       custom fixtures: page objects, an API-created user and article
+helpers/        API helpers, test data generators, auth state
 .github/        CI workflow
 ```
 
-### Conventions
+## Conventions
 
 - Every `describe` declares its auth state explicitly:
   `test.use({ storageState: GUEST })` or `test.use({ storageState: AUTH_FILE })`.
