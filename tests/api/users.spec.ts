@@ -190,3 +190,65 @@ test.describe('POST /api/users', () => {
     expect(json.errors).toBeDefined();
   });
 });
+
+test.describe('PUT /api/user', () => {
+  test('Update users bio and image', async ({ request, user }) => {
+    test.fail(true, '500 error after updating bio and image');
+    const response = await request.put('/api/user', {
+      headers: { Authorization: `Token ${user.token}` },
+      data: {
+        user: { bio: 'SomeManWithSword', image: 'image.url' },
+      },
+    });
+
+    expect(response.status()).toBe(200);
+    const json = await response.json();
+
+    expect(json).toEqual({
+      user: {
+        username: user.username,
+        email: user.email,
+        token: expect.any(String),
+        bio: 'SomeManWithSword',
+        image: 'image.url',
+      },
+    });
+  });
+
+  test('Update users bio and image without token', async ({ request }) => {
+    const response = await request.put('/api/user', {
+      data: {
+        user: { bio: 'SomeManWithSword2', image: 'image.url2' },
+      },
+    });
+
+    expect(response.status()).toBe(401);
+    const json = await response.json();
+
+    expect(json.errors).toBeDefined();
+  });
+
+  test('Update username with password', async ({ request, user }) => {
+    test.fail(true, 'email doesnt return in response after changing username');
+    const uniqueName = generateUsername();
+    const response = await request.put('/api/user', {
+      headers: { Authorization: `Token ${user.token}` },
+      data: {
+        user: { username: uniqueName, password: user.password },
+      },
+    });
+
+    expect(response.status()).toBe(200);
+    const json = await response.json();
+
+    expect(json).toEqual({
+      user: {
+        username: uniqueName,
+        email: user.email,
+        token: user.token,
+        bio: null,
+        image: null,
+      },
+    });
+  });
+});
