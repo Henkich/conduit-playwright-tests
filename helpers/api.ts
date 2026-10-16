@@ -5,6 +5,7 @@ import {
   generateArticleBody,
   generateArticleDescription,
   generateArticleName,
+  generateArticleTags,
 } from './data';
 
 export type User = {
@@ -18,6 +19,7 @@ export type Article = {
   body: string;
   description: string;
   slug: string;
+  tagList: string[];
 };
 
 export async function createArticle(request: APIRequestContext, token: string): Promise<Article> {
@@ -25,10 +27,11 @@ export async function createArticle(request: APIRequestContext, token: string): 
     title: generateArticleName(),
     body: generateArticleBody(),
     description: generateArticleDescription(),
+    tagList: generateArticleTags(),
   };
   const response = await request.post('/api/articles', {
     headers: { Authorization: `Token ${token}` },
-    data: { article: { ...article, tagList: [] } },
+    data: { article },
   });
   expect(response.ok(), 'Article should be created').toBeTruthy();
   const json = await response.json();
