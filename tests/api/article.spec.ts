@@ -398,3 +398,60 @@ test.describe('PUT /api/articles/:slug', () => {
     expect(json.errors).toBeDefined();
   });
 });
+
+test.describe('DELETE /api/articles/:slug', () => {
+  test('Author delete the owned article', async ({ request, user }) => {
+    test.fail(true, 'Received 200 status instead of 204');
+    const article = await createArticle(request, user.token);
+
+    const response = await request.delete(`/api/articles/${article.slug}`, {
+      headers: { Authorization: `Token ${user.token}` },
+    });
+
+    expect.soft(response.status()).toBe(204);
+
+    const response2 = await request.get(`/api/articles/${article.slug}`, {});
+    expect(response2.status()).toBe(404);
+    const json2 = await response2.json();
+    expect(json2.errors).toBeDefined();
+  });
+
+  test('Not owner tries to delete the article', async ({ request, user }) => {
+    const stranger = await createUser(request);
+    const article = await createArticle(request, user.token);
+
+    const response = await request.delete(`/api/articles/${article.slug}`, {
+      headers: { Authorization: `Token ${stranger.token}` },
+    });
+
+    expect(response.status()).toBe(403);
+    const json = await response.json();
+    expect(json.errors).toBeDefined();
+
+    const getArticle = await request.get(`/api/articles/${article.slug}`);
+    expect(getArticle.status()).toBe(200);
+  });
+
+  test('Not logged in User tries to delete the article', async ({ request, user }) => {
+    const article = await createArticle(request, user.token);
+
+    const response = await request.delete(`/api/articles/${article.slug}`);
+
+    expect(response.status()).toBe(401);
+    const json = await response.json();
+    expect(json.errors).toBeDefined();
+
+    const getArticle = await request.get(`/api/articles/${article.slug}`);
+    expect(getArticle.status()).toBe(200);
+  });
+
+  test('User tries to delete not existed article', async ({ request, user }) => {
+    const response = await request.delete(`/api/articles/${generateArticleName().toLowerCase()}`, {
+      headers: { Authorization: `Token ${user.token}` },
+    });
+
+    expect(response.status()).toBe(404);
+    const json = await response.json();
+    expect(json.errors).toBeDefined();
+  });
+});
