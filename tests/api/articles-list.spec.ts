@@ -20,4 +20,24 @@ test.describe('GET /api/articles?author=', () => {
     expect(json.articles).toHaveLength(2);
     expect.soft(json.articlesCount).toBe(2);
   });
+
+  test('User filter by tag', async ({ request, user }) => {
+    const creator = await createUser(request);
+    const article1 = await createArticle(request, creator.token);
+    const tag = article1.tagList[1];
+
+    const response = await request.get(`/api/articles`, {
+      headers: { Authorization: `Token ${user.token}` },
+      params: { tag: tag },
+    });
+
+    expect(response.status()).toBe(200);
+    const json = await response.json();
+
+    const slugs = json.articles.map((a: { slug: string }) => a.slug);
+    expect(slugs).toContain(article1.slug);
+    for (const a of json.articles) {
+      expect(a.tagList).toContain(tag);
+    }
+  });
 });
