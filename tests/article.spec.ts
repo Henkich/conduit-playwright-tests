@@ -3,7 +3,7 @@ import {
   generateArticleBody,
   generateArticleDescription,
   generateArticleName,
-  generateArticleTags,
+  generateTag,
   uniqueId,
 } from '../helpers/data';
 import { AUTH_FILE, GUEST } from '../helpers/auth';
@@ -29,7 +29,7 @@ test.describe('Article', () => {
       title,
       generateArticleDescription(),
       generateArticleBody(),
-      generateArticleTags(),
+      generateTag(),
     );
     await expect(page).toHaveURL(`/#/article/${title.toLowerCase()}`);
     await expect(page.getByRole('heading', { name: title })).toBeVisible();

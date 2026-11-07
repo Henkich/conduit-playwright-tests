@@ -7,5 +7,11 @@ export default defineConfig(
   { ignores: ['playwright-report/', 'test-results/', 'playwright/'] },
   js.configs.recommended,
   tseslint.configs.recommended,
+  {
+    rules: {
+      // allow dropping a field via rest destructuring: const { tagList, ...rest } = obj
+      '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
+    },
+  },
   { files: ['tests/**'], ...playwright.configs['flat/recommended'] },
 );

@@ -5,6 +5,7 @@ import {
   generateArticleBody,
   generateArticleDescription,
   generateArticleName,
+  generateArticleTags,
 } from './data';
 
 export type User = {
@@ -18,17 +19,29 @@ export type Article = {
   body: string;
   description: string;
   slug: string;
+  tagList: string[];
 };
 
-export async function createArticle(request: APIRequestContext, token: string): Promise<Article> {
+export function createArticleData(overrides: Partial<Omit<Article, 'slug'>> = {}) {
   const article = {
     title: generateArticleName(),
     body: generateArticleBody(),
     description: generateArticleDescription(),
+    tagList: generateArticleTags(),
+    ...overrides,
   };
+  return article;
+}
+
+export async function createArticle(
+  request: APIRequestContext,
+  token: string,
+  overrides: Partial<Omit<Article, 'slug'>> = {},
+): Promise<Article> {
+  const article = createArticleData(overrides);
   const response = await request.post('/api/articles', {
     headers: { Authorization: `Token ${token}` },
-    data: { article: { ...article, tagList: [] } },
+    data: { article },
   });
   expect(response.ok(), 'Article should be created').toBeTruthy();
   const json = await response.json();

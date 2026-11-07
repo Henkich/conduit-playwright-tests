@@ -36,12 +36,20 @@ locally in Docker.
 Requests go straight to the backend, no browser. Responses are checked against the
 [RealWorld OpenAPI spec](docs/realworld-openapi.yml): status code and response shape.
 
-| Endpoint                | Scenarios                                                             |
-| ----------------------- | --------------------------------------------------------------------- |
-| `POST /api/users/login` | valid credentials, wrong password, unknown email                      |
-| `POST /api/users`       | sign-up, taken email, taken username, empty password                  |
-| `GET /api/user`         | valid token, no token, forged token, malformed `Authorization` header |
-| `PUT /api/user`         | update bio and image, update username, no token                       |
+| Endpoint                                     | Scenarios                                                                       |
+| -------------------------------------------- | ------------------------------------------------------------------------------- |
+| `POST /api/users/login`                      | valid credentials, wrong password, unknown email                                |
+| `POST /api/users`                            | sign-up, taken email, taken username, empty password                            |
+| `GET /api/user`                              | valid token, no token, forged token, malformed `Authorization` header           |
+| `PUT /api/user`                              | update bio and image, update username, no token                                 |
+| `GET /api/profiles/:username`                | profile, unknown user                                                           |
+| `POST/DELETE /api/profiles/:username/follow` | follow, unfollow, no token                                                      |
+| `POST /api/articles`                         | create, no token, empty title, duplicate title, no or non-array `tagList`       |
+| `GET /api/articles/:slug`                    | existing article, unknown slug                                                  |
+| `PUT /api/articles/:slug`                    | author updates body or title (new slug), other user 403, no token, unknown slug |
+| `DELETE /api/articles/:slug`                 | author deletes, other user 403, no token, unknown slug                          |
+| `POST/DELETE /api/articles/:slug/favorite`   | favorite, unfavorite, `favorited` per viewer                                    |
+| `GET /api/articles`                          | filter by author, filter by tag                                                 |
 
 ## Known application bugs
 
@@ -59,6 +67,11 @@ marked with `test.fail()`, so the suite stays green and the bug stays visible in
   username, while profiles and follows are looked up by username.
 - **Updating a user without a password returns 500**: the password check uses `||` instead of
   `&&`, so the server always tries to hash a password. The update response also has no `email`.
+- **Article creation is not validated**: without `tagList` the server returns 500 instead of 201,
+  and a string `tagList` is accepted and echoed back in the response, while no tags are saved.
+- **`articlesCount` is wrong**: the article list counts article-tag rows, so an author with two
+  articles of three tags each gets `articlesCount: 6`.
+- **`DELETE /api/articles/:slug` returns 200 with a body** instead of 204 from the spec.
 
 ## Getting started
 
