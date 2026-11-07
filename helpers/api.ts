@@ -22,13 +22,23 @@ export type Article = {
   tagList: string[];
 };
 
-export async function createArticle(request: APIRequestContext, token: string): Promise<Article> {
+export function createArticleData(overrides: Partial<Omit<Article, 'slug'>> = {}) {
   const article = {
     title: generateArticleName(),
     body: generateArticleBody(),
     description: generateArticleDescription(),
     tagList: generateArticleTags(),
+    ...overrides,
   };
+  return article;
+}
+
+export async function createArticle(
+  request: APIRequestContext,
+  token: string,
+  overrides: Partial<Omit<Article, 'slug'>> = {},
+): Promise<Article> {
+  const article = createArticleData(overrides);
   const response = await request.post('/api/articles', {
     headers: { Authorization: `Token ${token}` },
     data: { article },

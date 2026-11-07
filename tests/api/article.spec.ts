@@ -1,28 +1,14 @@
 import { test, expect } from '../../fixtures';
-import {
-  generateArticleName,
-  generateArticleBody,
-  generateArticleDescription,
-  generateArticleTags,
-  generateTag,
-} from '../../helpers/data';
-import { createArticle, createUser } from '../../helpers/api';
+import { generateArticleName, generateArticleBody, generateArticleTags } from '../../helpers/data';
+import { createArticle, createUser, createArticleData } from '../../helpers/api';
 
 test.describe('POST /api/articles', () => {
   test('Create Article', async ({ request, user }) => {
-    const title = generateArticleName();
-    const description = generateArticleDescription();
-    const body = generateArticleBody();
-    const tags = generateArticleTags();
+    const article = createArticleData();
     const response = await request.post(`/api/articles/`, {
       headers: { Authorization: `Token ${user.token}` },
       data: {
-        article: {
-          title: title,
-          description: description,
-          body: body,
-          tagList: tags,
-        },
+        article,
       },
     });
 
@@ -31,10 +17,7 @@ test.describe('POST /api/articles', () => {
 
     expect(json).toMatchObject({
       article: {
-        title: title,
-        description: description,
-        body: body,
-        tagList: tags,
+        ...article,
         favorited: false,
         author: {
           username: user.username,
@@ -48,19 +31,12 @@ test.describe('POST /api/articles', () => {
 
   test('Create Article, taglist isnt array', async ({ request, user }) => {
     test.fail(true, 'server aceept tagList in non-array type');
-    const title = generateArticleName();
-    const description = generateArticleDescription();
-    const body = generateArticleBody();
-    const tags = generateTag();
+    const article = { ...createArticleData(), tagList: generateArticleTags().toString() };
+
     const response = await request.post(`/api/articles/`, {
       headers: { Authorization: `Token ${user.token}` },
       data: {
-        article: {
-          title: title,
-          description: description,
-          body: body,
-          tagList: tags,
-        },
+        article,
       },
     });
 
@@ -72,17 +48,11 @@ test.describe('POST /api/articles', () => {
 
   test('Create Article without Tags', async ({ request, user }) => {
     test.fail(true, '500 error insead of 201 without tags');
-    const title = generateArticleName();
-    const description = generateArticleDescription();
-    const body = generateArticleBody();
+    const { tagList, ...article } = createArticleData();
     const response = await request.post(`/api/articles/`, {
       headers: { Authorization: `Token ${user.token}` },
       data: {
-        article: {
-          title: title,
-          description: description,
-          body: body,
-        },
+        article,
       },
     });
 
@@ -91,9 +61,9 @@ test.describe('POST /api/articles', () => {
 
     expect(json).toMatchObject({
       article: {
-        title: title,
-        description: description,
-        body: body,
+        title: article.title,
+        description: article.description,
+        body: article.body,
         tagList: [],
         favorited: false,
         author: {
@@ -108,19 +78,11 @@ test.describe('POST /api/articles', () => {
 
   test('Create Article with same existed title', async ({ request, user }) => {
     const article = await createArticle(request, user.token);
-    const title = article.title;
-    const description = generateArticleDescription();
-    const body = generateArticleBody();
-    const tags = generateArticleTags();
+    const articleDupl = createArticleData({ title: article.title });
     const response = await request.post(`/api/articles/`, {
       headers: { Authorization: `Token ${user.token}` },
       data: {
-        article: {
-          title: title,
-          description: description,
-          body: body,
-          tagList: tags,
-        },
+        article: articleDupl,
       },
     });
 
@@ -131,18 +93,10 @@ test.describe('POST /api/articles', () => {
   });
 
   test('Create Article without Login', async ({ request }) => {
-    const title = generateArticleName();
-    const description = generateArticleDescription();
-    const body = generateArticleBody();
-    const tags = generateArticleTags();
+    const article = createArticleData();
     const response = await request.post(`/api/articles/`, {
       data: {
-        article: {
-          title: title,
-          description: description,
-          body: body,
-          tagList: tags,
-        },
+        article,
       },
     });
 
@@ -153,18 +107,11 @@ test.describe('POST /api/articles', () => {
   });
 
   test('Create Article without required field', async ({ request, user }) => {
-    const description = generateArticleDescription();
-    const body = generateArticleBody();
-    const tags = generateArticleTags();
+    const article = createArticleData({ title: '' });
     const response = await request.post(`/api/articles/`, {
       headers: { Authorization: `Token ${user.token}` },
       data: {
-        article: {
-          title: '',
-          description: description,
-          body: body,
-          tagList: tags,
-        },
+        article,
       },
     });
 
