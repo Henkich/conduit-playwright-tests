@@ -1,7 +1,7 @@
 import { type Page, type Locator } from '@playwright/test';
+import { BasePage } from './BasePage';
 
-export class ArticlePage {
-  readonly page: Page;
+export class ArticlePage extends BasePage {
   readonly title: Locator;
   readonly body: Locator;
   readonly tags: Locator;
@@ -18,7 +18,7 @@ export class ArticlePage {
   readonly guestText: Locator;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page);
     this.title = page.getByRole('heading', { level: 1 });
     this.body = page.locator('.article-content');
     const banner = page.locator('.banner');
@@ -39,6 +39,6 @@ export class ArticlePage {
     this.guestText = guest.getByText('Sign in or Sign up to add comments on this article.');
   }
   async open(slug: string) {
-    await this.page.goto(`/#/article/${slug}`);
+    await this.openBase(`/#/article/${slug}`);
   }
 }
