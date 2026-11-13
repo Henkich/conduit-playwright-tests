@@ -10,3 +10,4 @@ node_modules/
 # Local, not shared
 .claude/settings.local.json
 api.http
+PROGRESS.md
