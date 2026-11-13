@@ -14,7 +14,23 @@ export default defineConfig(
       '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
     },
   },
-  { files: ['tests/**'], ...playwright.configs['flat/recommended'] },
+  {
+    files: ['tests/**/*.ts'],
+    ...playwright.configs['flat/recommended'],
+    rules: {
+      ...playwright.configs['flat/recommended'].rules,
+      'playwright/no-wait-for-timeout': 'error',
+      'playwright/no-force-option': 'error',
+      'playwright/no-networkidle': 'error',
+      'playwright/no-focused-test': 'error',
+      'playwright/missing-playwright-await': 'error',
+      'playwright/prefer-web-first-assertions': 'error',
+      'playwright/valid-expect': 'error',
+      'playwright/no-conditional-in-test': 'error',
+      'playwright/no-skipped-test': 'warn',
+      'playwright/expect-expect': 'error',
+    },
+  },
   // .mjs files are Node scripts (e.g. Claude Code hooks): process, console, etc.
   { files: ['**/*.mjs'], languageOptions: { globals: globals.node } },
 );
