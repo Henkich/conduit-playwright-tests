@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "ask": ["Bash(git push:*)", "Bash(gh pr merge:*)"],
+    "deny": ["Bash(git reset --hard:*)", "Bash(git branch -D:*)", "Bash(git clean:*)"]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-git.mjs\""
+          }
+        ]
+      }
+    ]
+  }
+}

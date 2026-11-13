@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import { defineConfig } from 'eslint/config';
+import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import playwright from 'eslint-plugin-playwright';
 
@@ -14,4 +15,6 @@ export default defineConfig(
     },
   },
   { files: ['tests/**'], ...playwright.configs['flat/recommended'] },
+  // .mjs files are Node scripts (e.g. Claude Code hooks): process, console, etc.
+  { files: ['**/*.mjs'], languageOptions: { globals: globals.node } },
 );
