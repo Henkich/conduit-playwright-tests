@@ -5,7 +5,7 @@
 - Never commit directly to `main`: branch → PR → merge.
 - Before committing, propose how to split the changes into logical commits
   and wait for approval.
-- Before every commit run `npm run check` (Prettier + ESLint + tsc) and `npm test`.
+- Before every commit run `npm run check`; run `npm test` when test code changed.
 
 ## Commits
 

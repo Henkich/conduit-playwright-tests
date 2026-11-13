@@ -14,6 +14,11 @@ C:\TestProject\
 
 Обидва репозиторії публічні (CI скачує conduit-app без токена).
 
+## Tests
+
+Before planning or writing tests, read `.claude/rules/testing.md`
+(and `.claude/rules/api-tests.md` for API tests).
+
 ## Тестований застосунок (conduit-app)
 
 RealWorld / Conduit, клон Medium: JWT, CRUD статей, коментарі, підписки, REST API.
@@ -43,22 +48,6 @@ React/Vite + Express + Sequelize + Postgres у Docker Compose.
 - Контракт API: `docs/realworld-openapi.yml` (офіційна специфікація RealWorld)
 
 ## Домовленості
-
-### Архітектура тестів
-
-- Шари: тест («що перевіряємо») → Page Object / хелпер («як») → Playwright
-- Page Object: локатори й дії, **без** `expect`. Один клас на сторінку/компонент з усіма
-  станами. Метод — лише коли щось ховає, а не обгортає один рядок
-- Локатори: `getByRole` → `getByPlaceholder` / `getByText` → `locator`. Однакові елементи
-  розрізняємо контейнером (`.banner`, `.article-actions`), а не `first()`/`nth()`
-- Кожен тест створює свої дані; підготовка через API, UI лише там, де його й тестуємо
-- Стан авторизації: кожен `describe` першим рядком задає
-  `test.use({ storageState: GUEST | AUTH_FILE })` (`helpers/auth.ts`, знімок — `tests/auth.setup.ts`)
-- Файли за функціоналом: гостьові й залогінені сценарії однієї фічі — один файл, два `describe`
-- API-тести (`tests/api/`, project `api`): варіанти токена перевірено один раз на
-  `GET /api/user`; для інших ендпоінтів — лише «без токена → 401»
-- Відомі баги: тест описує правильну поведінку + `test.fail(true, 'BUG: ...')`
-- `test.only` ніколи не комітимо
 
 ## Прогрес
 
