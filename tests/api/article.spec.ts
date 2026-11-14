@@ -5,7 +5,7 @@ import { createArticle, createUser, createArticleData } from '../../helpers/api'
 test.describe('POST /api/articles', () => {
   test('Create Article', async ({ request, user }) => {
     const article = createArticleData();
-    const response = await request.post(`/api/articles/`, {
+    const response = await request.post('/api/articles', {
       headers: { Authorization: `Token ${user.token}` },
       data: {
         article,
@@ -18,6 +18,7 @@ test.describe('POST /api/articles', () => {
     expect(json).toMatchObject({
       article: {
         ...article,
+        tagList: expect.arrayContaining(article.tagList),
         favorited: false,
         author: {
           username: user.username,
@@ -27,13 +28,14 @@ test.describe('POST /api/articles', () => {
         },
       },
     });
+    expect(json.article.tagList).toHaveLength(article.tagList.length);
   });
 
   test('Create Article, taglist isnt array', async ({ request, user }) => {
-    test.fail(true, 'server aceept tagList in non-array type');
+    test.fail(true, 'BUG: server accepts tagList in non-array type');
     const article = { ...createArticleData(), tagList: generateArticleTags().toString() };
 
-    const response = await request.post(`/api/articles/`, {
+    const response = await request.post('/api/articles', {
       headers: { Authorization: `Token ${user.token}` },
       data: {
         article,
@@ -41,15 +43,12 @@ test.describe('POST /api/articles', () => {
     });
 
     expect(response.status()).toBe(422);
-    const json = await response.json();
-
-    expect(json.errors).toBeDefined();
   });
 
   test('Create Article without Tags', async ({ request, user }) => {
-    test.fail(true, '500 error insead of 201 without tags');
+    test.fail(true, 'BUG: 500 error instead of 201 without tags');
     const { tagList, ...article } = createArticleData();
-    const response = await request.post(`/api/articles/`, {
+    const response = await request.post('/api/articles', {
       headers: { Authorization: `Token ${user.token}` },
       data: {
         article,
@@ -57,7 +56,9 @@ test.describe('POST /api/articles', () => {
     });
 
     expect(response.status()).toBe(201);
-    const json = await response.json();
+
+    // uncomment after fix
+    /* const json = await response.json();
 
     expect(json).toMatchObject({
       article: {
@@ -74,27 +75,64 @@ test.describe('POST /api/articles', () => {
         },
       },
     });
+*/
   });
 
-  test('Create Article with same existed title', async ({ request, user }) => {
+  test('Status after Creating Article with same existed title', async ({ request, user }) => {
+    test.fail(true, 'BUG: 422 status is returned instead of 409');
     const article = await createArticle(request, user.token);
     const articleDupl = createArticleData({ title: article.title });
-    const response = await request.post(`/api/articles/`, {
+    const response = await request.post('/api/articles', {
       headers: { Authorization: `Token ${user.token}` },
       data: {
         article: articleDupl,
       },
     });
 
-    expect(response.status()).toBe(422);
+    expect(response.status()).toBe(409);
+  });
+
+  test('Creating Article with same existed title with errors, original is ok', async ({
+    request,
+    user,
+  }) => {
+    const article = await createArticle(request, user.token);
+    const articleDupl = createArticleData({ title: article.title });
+    const response = await request.post('/api/articles', {
+      headers: { Authorization: `Token ${user.token}` },
+      data: {
+        article: articleDupl,
+      },
+    });
+
+    expect(response.status()).toBeGreaterThanOrEqual(400);
+    expect(response.status()).toBeLessThan(500);
     const json = await response.json();
 
     expect(json.errors).toBeDefined();
+
+    const originalResponse = await request.get(`/api/articles/${article.slug}`, {
+      headers: { Authorization: `Token ${user.token}` },
+    });
+
+    await expect(originalResponse).toBeOK();
+    const originalJson = await originalResponse.json();
+
+    expect(originalJson).toMatchObject({
+      article: {
+        title: article.title,
+        description: article.description,
+        body: article.body,
+        tagList: expect.arrayContaining(article.tagList),
+        favorited: false,
+      },
+    });
+    expect(originalJson.article.tagList).toHaveLength(article.tagList.length);
   });
 
   test('Create Article without Login', async ({ request }) => {
     const article = createArticleData();
-    const response = await request.post(`/api/articles/`, {
+    const response = await request.post('/api/articles', {
       data: {
         article,
       },
@@ -108,7 +146,7 @@ test.describe('POST /api/articles', () => {
 
   test('Create Article without required field', async ({ request, user }) => {
     const article = createArticleData({ title: '' });
-    const response = await request.post(`/api/articles/`, {
+    const response = await request.post('/api/articles', {
       headers: { Authorization: `Token ${user.token}` },
       data: {
         article,
@@ -125,7 +163,7 @@ test.describe('POST /api/articles', () => {
 test.describe('GET /api/articles/:slug', () => {
   test('Receive created Article', async ({ request, user }) => {
     const article = await createArticle(request, user.token);
-    const response = await request.get(`/api/articles/${article.slug}`, {});
+    const response = await request.get(`/api/articles/${article.slug}`);
 
     expect(response.status()).toBe(200);
     const json = await response.json();
@@ -149,8 +187,8 @@ test.describe('GET /api/articles/:slug', () => {
   });
 
   test('Receive unexisted  Article', async ({ request }) => {
-    const unesixtedSlug = generateArticleName();
-    const response = await request.get(`/api/articles/${unesixtedSlug}`, {});
+    const nonExistentSlug = generateArticleName();
+    const response = await request.get(`/api/articles/${nonExistentSlug}`);
 
     expect(response.status()).toBe(404);
     const json = await response.json();
@@ -193,11 +231,11 @@ test.describe('PUT /api/articles/:slug', () => {
     });
     expect(json.article.tagList).toHaveLength(article.tagList.length);
 
-    const getAfterPost = await request.get(`/api/articles/${article.slug}`);
-    expect(getAfterPost.status()).toBe(200);
-    const json2 = await getAfterPost.json();
+    const getResponse = await request.get(`/api/articles/${article.slug}`);
+    expect(getResponse.status()).toBe(200);
+    const getJson = await getResponse.json();
 
-    expect(json2).toMatchObject({
+    expect(getJson).toMatchObject({
       article: {
         title: article.title,
         description: article.description,
@@ -212,6 +250,7 @@ test.describe('PUT /api/articles/:slug', () => {
         },
       },
     });
+    expect(getJson.article.tagList).toHaveLength(article.tagList.length);
   });
 
   test('Author change Title of article, slug changed too', async ({ request, user }) => {
@@ -249,11 +288,11 @@ test.describe('PUT /api/articles/:slug', () => {
 
     const newSlug = json.article.slug;
     expect(newSlug).toBe(newTitle.toLowerCase());
-    const getAfterPost = await request.get(`/api/articles/${newSlug}`);
-    expect(getAfterPost.status()).toBe(200);
-    const json2 = await getAfterPost.json();
+    const getResponse = await request.get(`/api/articles/${newSlug}`);
+    expect(getResponse.status()).toBe(200);
+    const getJson = await getResponse.json();
 
-    expect(json2).toMatchObject({
+    expect(getJson).toMatchObject({
       article: {
         slug: newSlug,
         title: newTitle,
@@ -269,6 +308,7 @@ test.describe('PUT /api/articles/:slug', () => {
         },
       },
     });
+    expect(getJson.article.tagList).toHaveLength(article.tagList.length);
   });
 
   test('Not owner tries to edit the article', async ({ request, user }) => {
@@ -289,10 +329,10 @@ test.describe('PUT /api/articles/:slug', () => {
 
     expect(json.errors).toBeDefined();
 
-    const getArticle = await request.get(`/api/articles/${article.slug}`);
-    expect(getArticle.status()).toBe(200);
-    const json2 = await getArticle.json();
-    expect(json2).toMatchObject({
+    const getResponse = await request.get(`/api/articles/${article.slug}`);
+    expect(getResponse.status()).toBe(200);
+    const getJson = await getResponse.json();
+    expect(getJson).toMatchObject({
       article: {
         slug: article.slug,
         title: article.title,
@@ -308,6 +348,7 @@ test.describe('PUT /api/articles/:slug', () => {
         },
       },
     });
+    expect(getJson.article.tagList).toHaveLength(article.tagList.length);
   });
 
   test('Not logged in User tries to edit the article', async ({ request, user }) => {
@@ -325,12 +366,33 @@ test.describe('PUT /api/articles/:slug', () => {
     const json = await response.json();
 
     expect(json.errors).toBeDefined();
+
+    const getResponse = await request.get(`/api/articles/${article.slug}`);
+    expect(getResponse.status()).toBe(200);
+    const getJson = await getResponse.json();
+    expect(getJson).toMatchObject({
+      article: {
+        slug: article.slug,
+        title: article.title,
+        description: article.description,
+        body: article.body,
+        tagList: expect.arrayContaining(article.tagList),
+        favorited: false,
+        author: {
+          username: user.username,
+          bio: null,
+          image: null,
+          following: false,
+        },
+      },
+    });
+    expect(getJson.article.tagList).toHaveLength(article.tagList.length);
   });
 
   test('User tries to edit not esixted article', async ({ request, user }) => {
-    const unexistedArticle = generateArticleName();
+    const nonExistentSlug = generateArticleName();
     const newBody = generateArticleBody();
-    const response = await request.put(`/api/articles/${unexistedArticle.toLowerCase()}`, {
+    const response = await request.put(`/api/articles/${nonExistentSlug.toLowerCase()}`, {
       headers: { Authorization: `Token ${user.token}` },
       data: {
         article: {
@@ -348,19 +410,29 @@ test.describe('PUT /api/articles/:slug', () => {
 
 test.describe('DELETE /api/articles/:slug', () => {
   test('Author delete the owned article', async ({ request, user }) => {
-    test.fail(true, 'Received 200 status instead of 204');
     const article = await createArticle(request, user.token);
 
     const response = await request.delete(`/api/articles/${article.slug}`, {
       headers: { Authorization: `Token ${user.token}` },
     });
 
-    expect.soft(response.status()).toBe(204);
+    await expect(response).toBeOK();
 
-    const response2 = await request.get(`/api/articles/${article.slug}`, {});
-    expect(response2.status()).toBe(404);
-    const json2 = await response2.json();
-    expect(json2.errors).toBeDefined();
+    const getResponse = await request.get(`/api/articles/${article.slug}`);
+    expect(getResponse.status()).toBe(404);
+    const getJson = await getResponse.json();
+    expect(getJson.errors).toBeDefined();
+  });
+
+  test('Status after deleting', async ({ request, user }) => {
+    test.fail(true, 'BUG: status 200 instead of 204 after delete');
+    const article = await createArticle(request, user.token);
+
+    const response = await request.delete(`/api/articles/${article.slug}`, {
+      headers: { Authorization: `Token ${user.token}` },
+    });
+
+    expect(response.status()).toBe(204);
   });
 
   test('Not owner tries to delete the article', async ({ request, user }) => {
@@ -375,8 +447,8 @@ test.describe('DELETE /api/articles/:slug', () => {
     const json = await response.json();
     expect(json.errors).toBeDefined();
 
-    const getArticle = await request.get(`/api/articles/${article.slug}`);
-    expect(getArticle.status()).toBe(200);
+    const getResponse = await request.get(`/api/articles/${article.slug}`);
+    expect(getResponse.status()).toBe(200);
   });
 
   test('Not logged in User tries to delete the article', async ({ request, user }) => {
@@ -388,8 +460,8 @@ test.describe('DELETE /api/articles/:slug', () => {
     const json = await response.json();
     expect(json.errors).toBeDefined();
 
-    const getArticle = await request.get(`/api/articles/${article.slug}`);
-    expect(getArticle.status()).toBe(200);
+    const getResponse = await request.get(`/api/articles/${article.slug}`);
+    expect(getResponse.status()).toBe(200);
   });
 
   test('User tries to delete not existed article', async ({ request, user }) => {
