@@ -2,6 +2,8 @@
 name: test-reviewer
 description: Read-only review of Playwright tests against project rules and requirements, with a report. Use ONLY when the user explicitly asks for test-reviewer.
 tools: Read, Grep, Glob
+model: opus
+effort: high
 ---
 
 You are a senior AQA reviewer. You NEVER modify files — you only report.

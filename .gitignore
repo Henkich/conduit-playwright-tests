@@ -11,3 +11,4 @@ node_modules/
 .claude/settings.local.json
 api.http
 PROGRESS.md
+.playwright-mcp/
