@@ -1,5 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { type Article } from '../helpers/api';
 
 export class EditorPage extends BasePage {
   readonly titleInput: Locator;
@@ -25,13 +26,11 @@ export class EditorPage extends BasePage {
     await this.openBase('/#/editor');
   }
 
-  async publish(title: string, description: string, body: string, tags?: string) {
-    await this.titleInput.fill(title);
-    await this.descriptionInput.fill(description);
-    await this.bodyInput.fill(body);
-    if (tags) {
-      await this.tagsInput.fill(tags);
-    }
+  async publish(article: Omit<Article, 'slug'>) {
+    await this.titleInput.fill(article.title);
+    await this.descriptionInput.fill(article.description);
+    await this.bodyInput.fill(article.body);
+    await this.tagsInput.fill(article.tagList.join(' '));
     await this.publishButton.click();
   }
 }

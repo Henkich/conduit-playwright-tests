@@ -1,12 +1,7 @@
 import { test, expect } from '../fixtures';
-import {
-  generateArticleBody,
-  generateArticleDescription,
-  generateArticleName,
-  generateTag,
-  uniqueId,
-} from '../helpers/data';
+import { generateArticleName, uniqueId } from '../helpers/data';
 import { AUTH_FILE, GUEST } from '../helpers/auth';
+import { createArticleData } from '../helpers/api';
 
 test.describe('Article', () => {
   test.use({ storageState: AUTH_FILE });
@@ -24,26 +19,22 @@ test.describe('Article', () => {
   });
 
   test('user can publish article with valid data', async ({ editorPage, page }) => {
-    const title = generateArticleName();
-    await editorPage.publish(
-      title,
-      generateArticleDescription(),
-      generateArticleBody(),
-      generateTag(),
-    );
-    await expect(page).toHaveURL(`/#/article/${title.toLowerCase()}`);
-    await expect(page.getByRole('heading', { name: title })).toBeVisible();
+    const article = createArticleData();
+    await editorPage.publish(article);
+    await expect(page).toHaveURL(`/#/article/${article.title.toLowerCase()}`);
+    await expect(page.getByRole('heading', { name: article.title })).toBeVisible();
   });
 
   test('user can publish article without tags', async ({ editorPage, page }) => {
-    const title = generateArticleName();
-    await editorPage.publish(title, generateArticleDescription(), generateArticleBody());
-    await expect(page).toHaveURL(`/#/article/${title.toLowerCase()}`);
-    await expect(page.getByRole('heading', { name: title })).toBeVisible();
+    const article = createArticleData({ tagList: [] });
+    await editorPage.publish(article);
+    await expect(page).toHaveURL(`/#/article/${article.title.toLowerCase()}`);
+    await expect(page.getByRole('heading', { name: article.title })).toBeVisible();
   });
 
   test('user cannot publish article with empty title', async ({ editorPage, page }) => {
-    await editorPage.publish('', generateArticleDescription(), generateArticleBody());
+    const article = createArticleData({ title: '' });
+    await editorPage.publish(article);
 
     const isMissing = await editorPage.titleInput.evaluate(
       (input: HTMLInputElement) => input.validity.valueMissing,
@@ -54,12 +45,14 @@ test.describe('Article', () => {
 
   test('2 articles with same title cannot be published', async ({ editorPage, page }) => {
     const title = generateArticleName();
-    await editorPage.publish(title, generateArticleDescription(), generateArticleBody());
-    await expect(page).toHaveURL(`/#/article/${title.toLowerCase()}`);
-    await expect(page.getByRole('heading', { name: title })).toBeVisible();
+    const article = createArticleData({ title: title });
+    await editorPage.publish(article);
+    await expect(page).toHaveURL(`/#/article/${article.title.toLowerCase()}`);
+    await expect(page.getByRole('heading', { name: article.title })).toBeVisible();
 
     await editorPage.open();
-    await editorPage.publish(title, generateArticleDescription(), generateArticleBody());
+    const articleDuplicated = createArticleData({ title: title });
+    await editorPage.publish(articleDuplicated);
 
     await expect(editorPage.errorMessage).toBeVisible();
     await expect(editorPage.errorMessage).toContainText(/Title already exists/i);
@@ -68,9 +61,10 @@ test.describe('Article', () => {
 
   test('article with non-english title can be published', async ({ editorPage, page }) => {
     const title = `Як козаки їхали в Тайланд${uniqueId()}`;
-    await editorPage.publish(title, generateArticleDescription(), generateArticleBody());
+    const article = createArticleData({ title: title });
+    await editorPage.publish(article);
     await expect(page).toHaveURL(/\/#\/article\//);
-    await expect(page.getByRole('heading', { name: title })).toBeVisible();
+    await expect(page.getByRole('heading', { name: article.title })).toBeVisible();
   });
 
   test('articles with non-english different titles but same characters can be published', async ({
@@ -80,15 +74,18 @@ test.describe('Article', () => {
     test.fail(true, 'Bug: different non-english characters are count as same characters');
     const id = uniqueId();
     const title1 = `Кіт${id}`;
-    await editorPage.publish(title1, generateArticleDescription(), generateArticleBody());
+    const article = createArticleData({ title: title1 });
+    await editorPage.publish(article);
     await expect(page).toHaveURL(/\/#\/article\//);
-    await expect(page.getByRole('heading', { name: title1 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: article.title })).toBeVisible();
 
     await editorPage.open();
     const title2 = `Пес${id}`;
-    await editorPage.publish(title2, generateArticleDescription(), generateArticleBody());
+    const article2 = createArticleData({ title: title2 });
+    await editorPage.publish(article2);
+
     await expect(page).toHaveURL(/\/#\/article\//);
-    await expect(page.getByRole('heading', { name: title2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: article2.title })).toBeVisible();
   });
 });
 
