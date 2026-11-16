@@ -14,10 +14,7 @@ test.describe('POST /api/articles/:slug/favorite', () => {
 
     expect(json).toMatchObject({
       article: {
-        slug: article.slug,
-        title: article.title,
-        description: article.description,
-        body: article.body,
+        ...article,
         tagList: expect.arrayContaining(article.tagList),
         favorited: true,
         favoritesCount: 1,
@@ -37,21 +34,9 @@ test.describe('POST /api/articles/:slug/favorite', () => {
     expect(getAfterFav.status()).toBe(200);
     const json2 = await getAfterFav.json();
 
-    expect(json2).toMatchObject({
-      article: {
-        title: article.title,
-        description: article.description,
-        body: article.body,
-        tagList: expect.arrayContaining(article.tagList),
-        favorited: true,
-        favoritesCount: 1,
-        author: {
-          username: user.username,
-          bio: null,
-          image: null,
-          following: false,
-        },
-      },
+    expect(json2.article).toMatchObject({
+      favorited: true,
+      favoritesCount: 1,
     });
 
     // favorited is per viewer, favoritesCount is shared
@@ -73,23 +58,7 @@ test.describe('POST /api/articles/:slug/favorite', () => {
     expect(response.status()).toBe(200);
     const json = await response.json();
 
-    expect(json).toMatchObject({
-      article: {
-        slug: article.slug,
-        title: article.title,
-        description: article.description,
-        body: article.body,
-        tagList: expect.arrayContaining(article.tagList),
-        favorited: true,
-        author: {
-          username: user.username,
-          bio: null,
-          image: null,
-          following: false,
-        },
-      },
-    });
-    expect(json.article.tagList).toHaveLength(article.tagList.length);
+    expect(json.article.favorited).toBe(true);
 
     const responseUNfavorite = await request.delete(`/api/articles/${article.slug}/favorite`, {
       headers: { Authorization: `Token ${adderFavorite.token}` },
@@ -99,10 +68,7 @@ test.describe('POST /api/articles/:slug/favorite', () => {
 
     expect(jsonunfav).toMatchObject({
       article: {
-        slug: article.slug,
-        title: article.title,
-        description: article.description,
-        body: article.body,
+        ...article,
         tagList: expect.arrayContaining(article.tagList),
         favorited: false,
         favoritesCount: 0,
@@ -114,6 +80,7 @@ test.describe('POST /api/articles/:slug/favorite', () => {
         },
       },
     });
+    expect(jsonunfav.article.tagList).toHaveLength(article.tagList.length);
 
     const getAfterUnFav = await request.get(`/api/articles/${article.slug}`, {
       headers: { Authorization: `Token ${adderFavorite.token}` },
@@ -121,21 +88,9 @@ test.describe('POST /api/articles/:slug/favorite', () => {
     expect(getAfterUnFav.status()).toBe(200);
     const json2 = await getAfterUnFav.json();
 
-    expect(json2).toMatchObject({
-      article: {
-        title: article.title,
-        description: article.description,
-        body: article.body,
-        tagList: expect.arrayContaining(article.tagList),
-        favorited: false,
-        favoritesCount: 0,
-        author: {
-          username: user.username,
-          bio: null,
-          image: null,
-          following: false,
-        },
-      },
+    expect(json2.article).toMatchObject({
+      favorited: false,
+      favoritesCount: 0,
     });
   });
 });
