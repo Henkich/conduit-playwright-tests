@@ -120,11 +120,8 @@ test.describe('POST /api/articles', () => {
 
     expect(originalJson).toMatchObject({
       article: {
-        title: article.title,
-        description: article.description,
-        body: article.body,
+        ...article,
         tagList: expect.arrayContaining(article.tagList),
-        favorited: false,
       },
     });
     expect(originalJson.article.tagList).toHaveLength(article.tagList.length);
@@ -170,9 +167,7 @@ test.describe('GET /api/articles/:slug', () => {
 
     expect(json).toMatchObject({
       article: {
-        title: article.title,
-        description: article.description,
-        body: article.body,
+        ...article,
         tagList: expect.arrayContaining(article.tagList),
         favorited: false,
         author: {
@@ -215,18 +210,9 @@ test.describe('PUT /api/articles/:slug', () => {
 
     expect(json).toMatchObject({
       article: {
-        slug: article.slug,
-        title: article.title,
-        description: article.description,
+        ...article,
         body: newBody,
         tagList: expect.arrayContaining(article.tagList),
-        favorited: false,
-        author: {
-          username: user.username,
-          bio: null,
-          image: null,
-          following: false,
-        },
       },
     });
     expect(json.article.tagList).toHaveLength(article.tagList.length);
@@ -237,17 +223,9 @@ test.describe('PUT /api/articles/:slug', () => {
 
     expect(getJson).toMatchObject({
       article: {
-        title: article.title,
-        description: article.description,
+        ...article,
         body: newBody,
         tagList: expect.arrayContaining(article.tagList),
-        favorited: false,
-        author: {
-          username: user.username,
-          bio: null,
-          image: null,
-          following: false,
-        },
       },
     });
     expect(getJson.article.tagList).toHaveLength(article.tagList.length);
@@ -270,18 +248,10 @@ test.describe('PUT /api/articles/:slug', () => {
 
     expect(json).toMatchObject({
       article: {
+        ...article,
         slug: expect.any(String),
         title: newTitle,
-        description: article.description,
-        body: article.body,
         tagList: expect.arrayContaining(article.tagList),
-        favorited: false,
-        author: {
-          username: user.username,
-          bio: null,
-          image: null,
-          following: false,
-        },
       },
     });
     expect(json.article.tagList).toHaveLength(article.tagList.length);
@@ -294,18 +264,10 @@ test.describe('PUT /api/articles/:slug', () => {
 
     expect(getJson).toMatchObject({
       article: {
+        ...article,
         slug: newSlug,
         title: newTitle,
-        description: article.description,
-        body: article.body,
         tagList: expect.arrayContaining(article.tagList),
-        favorited: false,
-        author: {
-          username: user.username,
-          bio: null,
-          image: null,
-          following: false,
-        },
       },
     });
     expect(getJson.article.tagList).toHaveLength(article.tagList.length);
@@ -334,18 +296,8 @@ test.describe('PUT /api/articles/:slug', () => {
     const getJson = await getResponse.json();
     expect(getJson).toMatchObject({
       article: {
-        slug: article.slug,
-        title: article.title,
-        description: article.description,
-        body: article.body,
+        ...article,
         tagList: expect.arrayContaining(article.tagList),
-        favorited: false,
-        author: {
-          username: user.username,
-          bio: null,
-          image: null,
-          following: false,
-        },
       },
     });
     expect(getJson.article.tagList).toHaveLength(article.tagList.length);
@@ -372,18 +324,8 @@ test.describe('PUT /api/articles/:slug', () => {
     const getJson = await getResponse.json();
     expect(getJson).toMatchObject({
       article: {
-        slug: article.slug,
-        title: article.title,
-        description: article.description,
-        body: article.body,
+        ...article,
         tagList: expect.arrayContaining(article.tagList),
-        favorited: false,
-        author: {
-          username: user.username,
-          bio: null,
-          image: null,
-          following: false,
-        },
       },
     });
     expect(getJson.article.tagList).toHaveLength(article.tagList.length);
