@@ -1,4 +1,4 @@
-import { test as base } from '@playwright/test';
+import { test as base, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { Navbar } from '../pages/Navbar';
@@ -40,8 +40,15 @@ export const test = base.extend<Fixtures>({
     await use(user);
   },
   myArticle: async ({ request }, use) => {
-    const article = await createArticle(request, getAuthToken());
+    const token = getAuthToken();
+    const article = await createArticle(request, token);
     await use(article);
+
+    const response = await request.delete(`/api/articles/${article.slug}`, {
+      headers: { Authorization: `Token ${token}` },
+    });
+
+    expect([200, 204, 404]).toContain(response.status());
   },
 });
 
