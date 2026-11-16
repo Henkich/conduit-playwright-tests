@@ -14,6 +14,16 @@ export default defineConfig(
       '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
     },
   },
+  // typed linting for TS: catches a forgotten await on any Promise (own helpers, page objects)
+  {
+    files: ['**/*.ts'],
+    languageOptions: {
+      parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
+    },
+    rules: {
+      '@typescript-eslint/no-floating-promises': 'error',
+    },
+  },
   {
     files: ['tests/**/*.ts'],
     ...playwright.configs['flat/recommended'],
