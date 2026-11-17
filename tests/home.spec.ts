@@ -32,4 +32,26 @@ test.describe('Home page', () => {
       await expect(homePage.noArticlesMessage).toBeVisible();
     },
   );
+
+  test('MOCKED: Empty tags', { tag: '@mock' }, async ({ homePage, page }) => {
+    await page.route('**/api/tags*', async (route) => {
+      await route.fulfill({ json: { tags: [] } });
+    });
+    await homePage.open();
+
+    await expect(homePage.noTagsMessages).toBeVisible();
+  });
+
+  test(
+    'MOCKED: 500 error message when tags request fails',
+    { tag: '@mock' },
+    async ({ homePage, page }) => {
+      await page.route('**/api/tags*', async (route) => {
+        await route.fulfill({ status: 500, json: { errors: { body: ['Internal server error'] } } });
+      });
+      await homePage.open();
+
+      await expect(homePage.noTagsMessages).toBeVisible();
+    },
+  );
 });
