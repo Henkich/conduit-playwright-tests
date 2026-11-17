@@ -1,4 +1,5 @@
 import { test, expect } from '../fixtures';
+import { createArticle } from '../helpers/api';
 import { GUEST } from '../helpers/auth';
 
 test.describe('Home page', () => {
@@ -76,6 +77,26 @@ test.describe('Home page', () => {
       await homePage.open();
 
       await expect(homePage.noArticlesMessage).toBeVisible();
+    },
+  );
+
+  test(
+    'MOCKED: Pagination respond articles amount',
+    { tag: '@mock' },
+    async ({ homePage, page, user, request }) => {
+      await createArticle(request, user.token);
+
+      await page.route('**/api/articles*', async (route) => {
+        const response = await route.fetch();
+        const json = await response.json();
+
+        await route.fulfill({ response, json: { ...json, articlesCount: 6 } });
+      });
+      await homePage.open();
+
+      await expect(homePage.navPagination).toBeVisible();
+      await expect(homePage.pageButton(2)).toBeVisible();
+      await expect(homePage.pageButton(3)).toHaveCount(0);
     },
   );
 });

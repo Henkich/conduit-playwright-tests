@@ -5,15 +5,21 @@ export class HomePage extends BasePage {
   readonly noArticlesMessage: Locator;
   readonly noTagsMessages: Locator;
   readonly globalFeedTab: Locator;
+  readonly navPagination: Locator;
 
   constructor(page: Page) {
     super(page);
     this.noArticlesMessage = page.getByText('Articles not available.');
     this.noTagsMessages = page.getByText('Tags list not available');
     this.globalFeedTab = page.getByRole('button', { name: 'Global Feed' });
+    this.navPagination = page.getByRole('navigation', { name: 'Pagination' });
   }
 
   async open() {
     await this.openBase('/#/');
+  }
+
+  pageButton(pageNumber: number) {
+    return this.navPagination.getByRole('button', { name: `Page ${pageNumber}`, exact: true });
   }
 }
