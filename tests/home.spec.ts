@@ -54,4 +54,28 @@ test.describe('Home page', () => {
       await expect(homePage.noTagsMessages).toBeVisible();
     },
   );
+
+  test('MOCKED: Network abort with tags request', { tag: '@mock' }, async ({ homePage, page }) => {
+    test.fail(true, 'BUG: Full empty page');
+    await page.route('**/api/tags*', async (route) => {
+      await route.abort();
+    });
+    await homePage.open();
+
+    await expect(homePage.noTagsMessages).toBeVisible();
+  });
+
+  test(
+    'MOCKED: Network abort with Articles request',
+    { tag: '@mock' },
+    async ({ homePage, page }) => {
+      test.fail(true, 'BUG: Full empty page');
+      await page.route('**/api/articles*', async (route) => {
+        await route.abort();
+      });
+      await homePage.open();
+
+      await expect(homePage.noArticlesMessage).toBeVisible();
+    },
+  );
 });
