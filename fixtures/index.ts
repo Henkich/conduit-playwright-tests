@@ -6,6 +6,7 @@ import { createArticle, createUser, type User, type Article } from '../helpers/a
 import { EditorPage } from '../pages/EditorPage';
 import { ArticlePage } from '../pages/ArticlePage';
 import { getAuthToken } from '../helpers/auth';
+import { HomePage } from '../pages/HomePage';
 
 type Fixtures = {
   loginPage: LoginPage;
@@ -15,6 +16,7 @@ type Fixtures = {
   editorPage: EditorPage;
   articlePage: ArticlePage;
   myArticle: Article;
+  homePage: HomePage;
 };
 
 export const test = base.extend<Fixtures>({
@@ -32,6 +34,9 @@ export const test = base.extend<Fixtures>({
   },
   articlePage: async ({ page }, use) => {
     await use(new ArticlePage(page));
+  },
+  homePage: async ({ page }, use) => {
+    await use(new HomePage(page));
   },
 
   // Each test gets its own fresh user, created via API (fast, no UI clicks) when user is used
