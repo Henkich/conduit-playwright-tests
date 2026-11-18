@@ -99,4 +99,22 @@ test.describe('Home page', () => {
       await expect(homePage.pageButton(3)).toHaveCount(0);
     },
   );
+
+  test(
+    'MOCKED: Loader is shown while articles are loading',
+    { tag: '@mock' },
+    async ({ homePage, page }) => {
+      await page.route('**/api/articles*', async (route) => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 1500);
+        });
+        await route.fulfill({ json: { articles: [], articlesCount: 0 } });
+      });
+      await homePage.open();
+
+      await expect(homePage.loadingArticles).toBeVisible();
+      await expect(homePage.loadingArticles).toBeHidden();
+      await expect(homePage.noArticlesMessage).toBeVisible();
+    },
+  );
 });

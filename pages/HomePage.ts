@@ -6,6 +6,7 @@ export class HomePage extends BasePage {
   readonly noTagsMessages: Locator;
   readonly globalFeedTab: Locator;
   readonly navPagination: Locator;
+  readonly loadingArticles: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -13,6 +14,7 @@ export class HomePage extends BasePage {
     this.noTagsMessages = page.getByText('Tags list not available');
     this.globalFeedTab = page.getByRole('button', { name: 'Global Feed' });
     this.navPagination = page.getByRole('navigation', { name: 'Pagination' });
+    this.loadingArticles = page.getByText('Loading articles list...');
   }
 
   async open() {
