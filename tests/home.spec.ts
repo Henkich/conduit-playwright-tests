@@ -1,7 +1,7 @@
 import { test, expect } from '../fixtures';
 import { createArticle, createArticleData } from '../helpers/api';
 import { GUEST } from '../helpers/auth';
-import { generateArticleName, generateUsername } from '../helpers/data';
+import { generateArticleName, generateTag, generateUsername } from '../helpers/data';
 
 test.describe('Home page', () => {
   test.use({ storageState: GUEST });
@@ -151,4 +151,41 @@ test.describe('Home page', () => {
       await expect(homePage.articleTags).toHaveText(article.tagList);
     },
   );
+
+  test(
+    'MOCKED: Click on popular tag sends request with this tag',
+    { tag: '@mock' },
+    async ({ homePage, page }) => {
+      const tag = generateTag();
+      await page.route('**/api/tags*', async (route) => {
+        await route.fulfill({ json: { tags: [tag] } });
+      });
+      await homePage.open();
+
+      const requestPromise = page.waitForRequest('**/api/articles?tag=*');
+      await homePage.popularTag(tag).click();
+      const tagRequest = await requestPromise;
+      expect(new URL(tagRequest.url()).searchParams.get('tag')).toBe(tag);
+    },
+  );
+
+  test('Corresponded Article appears after click on the tag', async ({
+    homePage,
+    page,
+    user,
+    request,
+  }) => {
+    const article = await createArticle(request, user.token);
+    const tag = article.tagList[0];
+    await page.route('**/api/tags*', async (route) => {
+      await route.fulfill({ json: { tags: [tag] } });
+    });
+    await homePage.open();
+    await expect(homePage.loadingArticles).toBeHidden();
+    await homePage.popularTag(tag).click();
+
+    await expect(homePage.articleTitle).toHaveText([article.title]);
+    await expect(homePage.feedTag(tag)).toBeVisible();
+    await expect(homePage.feedTag(tag)).toHaveClass(/active/);
+  });
 });

@@ -37,4 +37,14 @@ export class HomePage extends BasePage {
   pageButton(pageNumber: number) {
     return this.navPagination.getByRole('button', { name: `Page ${pageNumber}`, exact: true });
   }
+
+  popularTag(tag: string) {
+    const sidebar = this.page.locator('.sidebar');
+    return sidebar.getByRole('button', { name: tag, exact: true });
+  }
+
+  feedTag(tag: string) {
+    const container = this.page.locator('.feed-toggle');
+    return container.getByRole('button', { name: tag });
+  }
 }
