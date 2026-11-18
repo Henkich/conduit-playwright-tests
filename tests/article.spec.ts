@@ -20,8 +20,16 @@ test.describe('Article', () => {
 
   test('user can publish article with valid data', async ({ editorPage, page }) => {
     const article = createArticleData();
+
+    const responsePromise = page.waitForResponse(
+      (res) => res.url().endsWith('/api/articles') && res.request().method() === 'POST',
+    );
     await editorPage.publish(article);
-    await expect(page).toHaveURL(`/#/article/${article.title.toLowerCase()}`);
+
+    const response = await responsePromise;
+    const json = await response.json();
+
+    await expect(page).toHaveURL(`/#/article/${json.article.slug}`);
     await expect(page.getByRole('heading', { name: article.title })).toBeVisible();
   });
 
@@ -62,8 +70,14 @@ test.describe('Article', () => {
   test('article with non-english title can be published', async ({ editorPage, page }) => {
     const title = `Як козаки їхали в Тайланд${uniqueId()}`;
     const article = createArticleData({ title: title });
+    const responsePromise = page.waitForResponse(
+      (res) => res.url().endsWith('/api/articles') && res.request().method() === 'POST',
+    );
     await editorPage.publish(article);
-    await expect(page).toHaveURL(/\/#\/article\//);
+    const response = await responsePromise;
+    const json = await response.json();
+
+    await expect(page).toHaveURL(`/#/article/${json.article.slug}`);
     await expect(page.getByRole('heading', { name: article.title })).toBeVisible();
   });
 
