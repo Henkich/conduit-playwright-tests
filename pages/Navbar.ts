@@ -8,6 +8,7 @@ export class Navbar {
   readonly newArticleLink: Locator;
   readonly userMenu: Locator;
   readonly logoutLink: Locator;
+  readonly conduitLogo: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -17,6 +18,7 @@ export class Navbar {
     this.newArticleLink = this.root.getByRole('link', { name: 'New Article' });
     this.userMenu = this.root.locator('.dropdown-toggle');
     this.logoutLink = this.root.getByRole('link', { name: 'Logout' });
+    this.conduitLogo = this.root.getByRole('link', { name: 'conduit' });
   }
 
   async logout() {
