@@ -5,6 +5,16 @@ import { AUTH_FILE, GUEST } from '../helpers/auth';
 test.describe('MyArticle', () => {
   test.use({ storageState: AUTH_FILE });
 
+  test('Articles tags are visible and correct', async ({ articlePage, myArticle }) => {
+    await articlePage.open(myArticle.slug);
+
+    await expect(articlePage.tags).toHaveCount(myArticle.tagList.length);
+
+    for (const tag of myArticle.tagList) {
+      await expect(articlePage.tags.getByText(tag, { exact: true })).toBeVisible();
+    }
+  });
+
   test('Articles elements are visible after creating own article', async ({
     articlePage,
     myArticle,
