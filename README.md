@@ -72,6 +72,8 @@ marked with `test.fail()`, so the suite stays green and the bug stays visible in
 - **`articlesCount` is wrong**: the article list counts article-tag rows, so an author with two
   articles of three tags each gets `articlesCount: 6`.
 - **`DELETE /api/articles/:slug` returns 200 with a body** instead of 204 from the spec.
+- **Article author is saved after the 201 response** (`setAuthor` without `await`): an immediate
+  GET of the new article sometimes returns 500, which makes the "publish article" UI tests flaky.
 
 ## Getting started
 

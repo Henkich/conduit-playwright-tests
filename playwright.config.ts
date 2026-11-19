@@ -26,8 +26,8 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('')`. */
     baseURL: process.env.BASE_URL ?? 'http://localhost:3000',
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    /* Keep the trace of the first failed run, so a flaky failure is recorded even if the retry passes. See https://playwright.dev/docs/trace-viewer */
+    trace: 'retain-on-first-failure',
   },
 
   /* Configure projects for major browsers */
