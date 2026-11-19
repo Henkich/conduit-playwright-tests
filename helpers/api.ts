@@ -1,11 +1,11 @@
 import { expect, type APIRequestContext } from '@playwright/test';
 import {
-  uniqueId,
   generateEmail,
   generateArticleBody,
   generateArticleDescription,
   generateArticleName,
   generateArticleTags,
+  generateUsername,
 } from './data';
 
 export type User = {
@@ -48,16 +48,21 @@ export async function createArticle(
   return { ...article, slug: json.article.slug };
 }
 
+export function createUserData(overrides: Partial<Omit<User, 'token'>> = {}) {
+  const user = {
+    username: generateUsername(),
+    email: generateEmail(),
+    password: 'Passw0rd!',
+    ...overrides,
+  };
+  return user;
+}
+
 export async function createUser(
   request: APIRequestContext,
-  password: string = 'Passw0rd!',
+  overrides: Partial<Omit<User, 'token'>> = {},
 ): Promise<User> {
-  const username = `user${uniqueId()}`;
-  const user = {
-    username,
-    email: generateEmail(),
-    password,
-  };
+  const user = createUserData(overrides);
   const response = await request.post('/api/users', { data: { user } });
   expect(response.ok(), 'user should be created via API').toBeTruthy();
   const json = await response.json();

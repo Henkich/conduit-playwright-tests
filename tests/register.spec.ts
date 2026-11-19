@@ -1,6 +1,6 @@
 import { test, expect } from '../fixtures';
-import { generateEmail } from '../helpers/data';
 import { GUEST } from '../helpers/auth';
+import { createUserData } from '../helpers/api';
 
 test.describe('Register', () => {
   test.use({ storageState: GUEST });
@@ -10,11 +10,7 @@ test.describe('Register', () => {
   });
 
   test('user can register with valid credentials', async ({ page, registerPage, navbar }) => {
-    const user = {
-      username: `user${Date.now()}${Math.floor(Math.random() * 1000)}`,
-      email: generateEmail(),
-      password: 'Passw0rd!',
-    };
+    const user = createUserData();
     await registerPage.register(user.email, user.password, user.username);
     await expect(page).toHaveURL(/\/#\/$/);
     await expect(navbar.newArticleLink).toBeVisible();

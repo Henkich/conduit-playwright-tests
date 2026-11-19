@@ -1,5 +1,6 @@
 import { test, expect } from '../../fixtures';
-import { generateEmail, generateUsername } from '../../helpers/data';
+import { createUserData } from '../../helpers/api';
+import { generateUsername } from '../../helpers/data';
 
 test.describe('POST /api/users/login', () => {
   test('Return user with valid creds', async ({ request, user }) => {
@@ -109,11 +110,7 @@ test.describe('GET /api/user', () => {
 
 test.describe('POST /api/users', () => {
   test('Successfully create the user', async ({ request }) => {
-    const newUser = {
-      email: generateEmail(),
-      username: generateUsername(),
-      password: '34523445f',
-    };
+    const newUser = createUserData();
     const response = await request.post('/api/users', {
       data: {
         user: newUser,
@@ -136,11 +133,7 @@ test.describe('POST /api/users', () => {
 
   test('Create User with same email', async ({ request, user }) => {
     test.fail(true, 'using already existed email in user creation returns 422 instead of 409');
-    const newUser = {
-      email: user.email,
-      username: generateUsername(),
-      password: '34523442345f',
-    };
+    const newUser = createUserData({ email: user.email });
     const response = await request.post('/api/users', {
       data: {
         user: newUser,
@@ -155,11 +148,7 @@ test.describe('POST /api/users', () => {
 
   test('Create User with same Username', async ({ request, user }) => {
     test.fail(true, 'another user with same username CAN BE created');
-    const newUser = {
-      email: generateEmail(),
-      username: user.username,
-      password: '34523442345f',
-    };
+    const newUser = createUserData({ username: user.username });
     const response = await request.post('/api/users', {
       data: {
         user: newUser,
@@ -173,11 +162,7 @@ test.describe('POST /api/users', () => {
   });
 
   test('Create User with empty password', async ({ request }) => {
-    const newUser = {
-      email: generateEmail(),
-      username: generateUsername(),
-      password: '',
-    };
+    const newUser = createUserData({ password: '' });
     const response = await request.post('/api/users', {
       data: {
         user: newUser,
