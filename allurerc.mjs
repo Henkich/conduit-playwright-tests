@@ -2,6 +2,9 @@ import { defineConfig } from 'allure';
 
 // Allure 3 report config, picked up by `allure generate` / `allure open`
 export default defineConfig({
+  // Every `generate` appends the run here and reads previous runs: History tab, flaky, trends.
+  // Local only (git-ignored); CI starts clean, so its reports have no history.
+  historyPath: './allure-history.jsonl',
   plugins: {
     awesome: {
       // Tree by business labels instead of file paths; unlabelled tests stay grouped by file
