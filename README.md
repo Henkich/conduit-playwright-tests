@@ -20,16 +20,17 @@ locally in Docker.
 
 ### UI
 
-| Area         | Scenarios                                                                                                                  |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| Login        | valid login, wrong password, unknown email, empty password (native validation)                                             |
-| Session      | session survives page reload, logout clears the session                                                                    |
-| Register     | successful sign-up, already registered email                                                                               |
-| Home         | logo and global feed are shown                                                                                             |
-| Articles     | editor form, publish with/without tags, empty title, duplicate title, non-latin title, guest redirect                      |
-| Own article  | title, body and author buttons, delete (confirm accepted), cancel delete (confirm dismissed), edit opens prefilled editor  |
-| Other author | follow and favorite instead of edit and delete, follow/unfollow author, favorite/unfavorite article, state survives reload |
-| Guest        | article without author buttons, sign-in prompt for comments, follow/favorite ask to log in                                 |
+| Area          | Scenarios                                                                                                                  |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Login         | valid login, wrong password, unknown email, empty password (native validation)                                             |
+| Session       | session survives page reload, logout clears the session                                                                    |
+| Register      | successful sign-up, already registered email                                                                               |
+| Home          | logo and global feed are shown                                                                                             |
+| Articles      | editor form, publish with/without tags, empty title, duplicate title, non-latin title, guest redirect                      |
+| Own article   | title, body and author buttons, delete (confirm accepted), cancel delete (confirm dismissed), edit opens prefilled editor  |
+| Other author  | follow and favorite instead of edit and delete, follow/unfollow author, favorite/unfavorite article, state survives reload |
+| Guest         | article without author buttons, sign-in prompt for comments, follow/favorite ask to log in                                 |
+| Accessibility | axe scan (WCAG A/AA) of login, register and home; known violations are separate `test.fail` tests                          |
 
 ### API
 
@@ -74,6 +75,8 @@ marked with `test.fail()`, so the suite stays green and the bug stays visible in
 - **`DELETE /api/articles/:slug` returns 200 with a body** instead of 204 from the spec.
 - **Article author is saved after the 201 response** (`setAuthor` without `await`): an immediate
   GET of the new article sometimes returns 500, which makes the "publish article" UI tests flaky.
+- **Accessibility (axe, WCAG AA)**: grey and green text (nav links, article meta, tags, the green
+  button and links) is below the 4.5:1 contrast ratio; pagination `<li>` items have no `<ul>`.
 
 ## Getting started
 
