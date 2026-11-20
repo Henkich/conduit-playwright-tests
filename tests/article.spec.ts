@@ -2,15 +2,23 @@ import { test, expect } from '../fixtures';
 import { generateArticleName, uniqueId } from '../helpers/data';
 import { AUTH_FILE, GUEST } from '../helpers/auth';
 import { createArticleData } from '../helpers/api';
+import * as allure from 'allure-js-commons';
+import { EPIC, FEATURE } from '../helpers/allure';
 
 test.describe('Article', () => {
   test.use({ storageState: AUTH_FILE });
+
+  test.beforeEach(async () => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.createArticle);
+  });
 
   test.beforeEach(async ({ editorPage }) => {
     await editorPage.open();
   });
 
   test('user open editor page and see all fields', async ({ editorPage }) => {
+    await allure.severity(allure.Severity.MINOR);
     await expect(editorPage.titleInput).toBeVisible();
     await expect(editorPage.descriptionInput).toBeVisible();
     await expect(editorPage.bodyInput).toBeVisible();
@@ -19,6 +27,7 @@ test.describe('Article', () => {
   });
 
   test('user can publish article with valid data', async ({ editorPage, page }) => {
+    await allure.severity(allure.Severity.CRITICAL);
     const article = createArticleData();
 
     const responsePromise = page.waitForResponse(
@@ -34,6 +43,7 @@ test.describe('Article', () => {
   });
 
   test('user can publish article without tags', async ({ editorPage, page }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const article = createArticleData({ tagList: [] });
     await editorPage.publish(article);
     await expect(page).toHaveURL(`/#/article/${article.title.toLowerCase()}`);
@@ -41,6 +51,7 @@ test.describe('Article', () => {
   });
 
   test('user cannot publish article with empty title', async ({ editorPage, page }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const article = createArticleData({ title: '' });
     await editorPage.publish(article);
 
@@ -52,6 +63,7 @@ test.describe('Article', () => {
   });
 
   test('2 articles with same title cannot be published', async ({ editorPage, page }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const title = generateArticleName();
     const article = createArticleData({ title: title });
     await editorPage.publish(article);
@@ -68,6 +80,7 @@ test.describe('Article', () => {
   });
 
   test('article with non-english title can be published', async ({ editorPage, page }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const title = `Як козаки їхали в Тайланд${uniqueId()}`;
     const article = createArticleData({ title: title });
     const responsePromise = page.waitForResponse(
@@ -85,6 +98,7 @@ test.describe('Article', () => {
     editorPage,
     page,
   }) => {
+    await allure.severity(allure.Severity.NORMAL);
     test.fail(true, 'Bug: different non-english characters are count as same characters');
     const id = uniqueId();
     const title1 = `Кіт${id}`;
@@ -106,7 +120,13 @@ test.describe('Article', () => {
 test.describe('Article (guest)', () => {
   test.use({ storageState: GUEST });
 
+  test.beforeEach(async () => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.createArticle);
+  });
+
   test('guest cannot open editor page', async ({ editorPage, page }) => {
+    await allure.severity(allure.Severity.NORMAL);
     await editorPage.open();
 
     await expect(page).toHaveURL(/\/#\/$/);

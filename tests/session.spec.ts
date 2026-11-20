@@ -1,10 +1,18 @@
 import { test, expect } from '../fixtures';
 import { AUTH_FILE } from '../helpers/auth';
+import * as allure from 'allure-js-commons';
+import { EPIC, FEATURE } from '../helpers/allure';
 
 test.describe('Session', () => {
   test.use({ storageState: AUTH_FILE });
 
+  test.beforeEach(async () => {
+    await allure.epic(EPIC.auth);
+    await allure.feature(FEATURE.session);
+  });
+
   test('user can log out', async ({ page, navbar }) => {
+    await allure.severity(allure.Severity.CRITICAL);
     await test.step('Opening main page', async () => {
       await page.goto('/#/');
       await expect(navbar.newArticleLink).toBeVisible();

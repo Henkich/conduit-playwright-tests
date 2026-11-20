@@ -1,9 +1,17 @@
 import { test, expect } from '../../fixtures';
 import { generateArticleName, generateArticleBody, generateArticleTags } from '../../helpers/data';
 import { createArticle, createUser, createArticleData } from '../../helpers/api';
+import * as allure from 'allure-js-commons';
+import { EPIC, FEATURE } from '../../helpers/allure';
 
 test.describe('POST /api/articles', () => {
+  test.beforeEach(async () => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.createArticle);
+  });
+
   test('Create Article', async ({ request, user }) => {
+    await allure.severity(allure.Severity.CRITICAL);
     const article = createArticleData();
     const response = await request.post('/api/articles', {
       headers: { Authorization: `Token ${user.token}` },
@@ -32,6 +40,7 @@ test.describe('POST /api/articles', () => {
   });
 
   test('Create Article, taglist isnt array', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     test.fail(true, 'BUG: server accepts tagList in non-array type');
     const article = { ...createArticleData(), tagList: generateArticleTags().toString() };
 
@@ -46,6 +55,7 @@ test.describe('POST /api/articles', () => {
   });
 
   test('Create Article without Tags', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     test.fail(true, 'BUG: 500 error instead of 201 without tags');
     const { tagList, ...article } = createArticleData();
     const response = await request.post('/api/articles', {
@@ -79,6 +89,7 @@ test.describe('POST /api/articles', () => {
   });
 
   test('Status after Creating Article with same existed title', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     test.fail(true, 'BUG: 422 status is returned instead of 409');
     const article = await createArticle(request, user.token);
     const articleDupl = createArticleData({ title: article.title });
@@ -96,6 +107,7 @@ test.describe('POST /api/articles', () => {
     request,
     user,
   }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const article = await createArticle(request, user.token);
     const articleDupl = createArticleData({ title: article.title });
     const response = await request.post('/api/articles', {
@@ -128,6 +140,7 @@ test.describe('POST /api/articles', () => {
   });
 
   test('Create Article without Login', async ({ request }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const article = createArticleData();
     const response = await request.post('/api/articles', {
       data: {
@@ -142,6 +155,7 @@ test.describe('POST /api/articles', () => {
   });
 
   test('Create Article without required field', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const article = createArticleData({ title: '' });
     const response = await request.post('/api/articles', {
       headers: { Authorization: `Token ${user.token}` },
@@ -158,7 +172,13 @@ test.describe('POST /api/articles', () => {
 });
 
 test.describe('GET /api/articles/:slug', () => {
+  test.beforeEach(async () => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.viewArticle);
+  });
+
   test('Receive created Article', async ({ request, user }) => {
+    await allure.severity(allure.Severity.CRITICAL);
     const article = await createArticle(request, user.token);
     const response = await request.get(`/api/articles/${article.slug}`);
 
@@ -182,6 +202,7 @@ test.describe('GET /api/articles/:slug', () => {
   });
 
   test('Receive unexisted  Article', async ({ request }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const nonExistentSlug = generateArticleName();
     const response = await request.get(`/api/articles/${nonExistentSlug}`);
 
@@ -193,7 +214,13 @@ test.describe('GET /api/articles/:slug', () => {
 });
 
 test.describe('PUT /api/articles/:slug', () => {
+  test.beforeEach(async () => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.editArticle);
+  });
+
   test('Author change Body of article', async ({ request, user }) => {
+    await allure.severity(allure.Severity.CRITICAL);
     const article = await createArticle(request, user.token);
     const newBody = generateArticleBody();
     const response = await request.put(`/api/articles/${article.slug}`, {
@@ -232,6 +259,7 @@ test.describe('PUT /api/articles/:slug', () => {
   });
 
   test('Author change Title of article, slug changed too', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const article = await createArticle(request, user.token);
     const newTitle = generateArticleName();
     const response = await request.put(`/api/articles/${article.slug}`, {
@@ -274,6 +302,7 @@ test.describe('PUT /api/articles/:slug', () => {
   });
 
   test('Not owner tries to edit the article', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const editor = await createUser(request);
     const article = await createArticle(request, user.token);
     const newBody = generateArticleBody();
@@ -304,6 +333,7 @@ test.describe('PUT /api/articles/:slug', () => {
   });
 
   test('Not logged in User tries to edit the article', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const article = await createArticle(request, user.token);
     const newBody = generateArticleBody();
     const response = await request.put(`/api/articles/${article.slug}`, {
@@ -332,6 +362,7 @@ test.describe('PUT /api/articles/:slug', () => {
   });
 
   test('User tries to edit not esixted article', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const nonExistentSlug = generateArticleName();
     const newBody = generateArticleBody();
     const response = await request.put(`/api/articles/${nonExistentSlug.toLowerCase()}`, {
@@ -351,7 +382,13 @@ test.describe('PUT /api/articles/:slug', () => {
 });
 
 test.describe('DELETE /api/articles/:slug', () => {
+  test.beforeEach(async () => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.deleteArticle);
+  });
+
   test('Author delete the owned article', async ({ request, user }) => {
+    await allure.severity(allure.Severity.CRITICAL);
     const article = await createArticle(request, user.token);
 
     const response = await request.delete(`/api/articles/${article.slug}`, {
@@ -367,6 +404,7 @@ test.describe('DELETE /api/articles/:slug', () => {
   });
 
   test('Status after deleting', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     test.fail(true, 'BUG: status 200 instead of 204 after delete');
     const article = await createArticle(request, user.token);
 
@@ -378,6 +416,7 @@ test.describe('DELETE /api/articles/:slug', () => {
   });
 
   test('Not owner tries to delete the article', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const stranger = await createUser(request);
     const article = await createArticle(request, user.token);
 
@@ -394,6 +433,7 @@ test.describe('DELETE /api/articles/:slug', () => {
   });
 
   test('Not logged in User tries to delete the article', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const article = await createArticle(request, user.token);
 
     const response = await request.delete(`/api/articles/${article.slug}`);
@@ -407,6 +447,7 @@ test.describe('DELETE /api/articles/:slug', () => {
   });
 
   test('User tries to delete not existed article', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const response = await request.delete(`/api/articles/${generateArticleName().toLowerCase()}`, {
       headers: { Authorization: `Token ${user.token}` },
     });

@@ -1,8 +1,16 @@
 import { test, expect } from '../../fixtures';
 import { createArticle, createUser } from '../../helpers/api';
+import * as allure from 'allure-js-commons';
+import { EPIC, FEATURE } from '../../helpers/allure';
 
 test.describe('POST /api/articles/:slug/favorite', () => {
+  test.beforeEach(async () => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.favorites);
+  });
+
   test('User add an Article to the Favorite', async ({ request, user }) => {
+    await allure.severity(allure.Severity.CRITICAL);
     const article = await createArticle(request, user.token);
     const adderFavorite = await createUser(request);
     const response = await request.post(`/api/articles/${article.slug}/favorite`, {
@@ -49,6 +57,7 @@ test.describe('POST /api/articles/:slug/favorite', () => {
   });
 
   test('User unfavorite Article', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const article = await createArticle(request, user.token);
     const adderFavorite = await createUser(request);
     const response = await request.post(`/api/articles/${article.slug}/favorite`, {

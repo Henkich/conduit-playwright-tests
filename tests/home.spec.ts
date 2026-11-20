@@ -2,11 +2,19 @@ import { test, expect } from '../fixtures';
 import { createArticle, createArticleData } from '../helpers/api';
 import { GUEST } from '../helpers/auth';
 import { generateArticleName, generateTag, generateUsername } from '../helpers/data';
+import * as allure from 'allure-js-commons';
+import { EPIC, FEATURE } from '../helpers/allure';
 
 test.describe('Home page', () => {
   test.use({ storageState: GUEST });
 
+  test.beforeEach(async () => {
+    await allure.epic(EPIC.articles);
+  });
+
   test('Main Page has logo and Global Feed', async ({ homePage, navbar }) => {
+    await allure.feature(FEATURE.articleList);
+    await allure.severity(allure.Severity.MINOR);
     await homePage.open();
 
     await expect(navbar.conduitLogo).toBeVisible();
@@ -14,6 +22,8 @@ test.describe('Home page', () => {
   });
 
   test('MOCKED: Empty Articles list', { tag: '@mock' }, async ({ homePage, page }) => {
+    await allure.feature(FEATURE.articleList);
+    await allure.severity(allure.Severity.NORMAL);
     await page.route('**/api/articles*', async (route) => {
       await route.fulfill({ json: { articles: [], articlesCount: 0 } });
     });
@@ -26,6 +36,8 @@ test.describe('Home page', () => {
     'MOCKED: 500 error message when articles request fails',
     { tag: '@mock' },
     async ({ homePage, page }) => {
+      await allure.feature(FEATURE.articleList);
+      await allure.severity(allure.Severity.NORMAL);
       await page.route('**/api/articles*', async (route) => {
         await route.fulfill({ status: 500, json: { errors: { body: ['Internal server error'] } } });
       });
@@ -36,6 +48,8 @@ test.describe('Home page', () => {
   );
 
   test('MOCKED: Empty tags', { tag: '@mock' }, async ({ homePage, page }) => {
+    await allure.feature(FEATURE.tags);
+    await allure.severity(allure.Severity.NORMAL);
     await page.route('**/api/tags*', async (route) => {
       await route.fulfill({ json: { tags: [] } });
     });
@@ -48,6 +62,8 @@ test.describe('Home page', () => {
     'MOCKED: 500 error message when tags request fails',
     { tag: '@mock' },
     async ({ homePage, page }) => {
+      await allure.feature(FEATURE.tags);
+      await allure.severity(allure.Severity.NORMAL);
       await page.route('**/api/tags*', async (route) => {
         await route.fulfill({ status: 500, json: { errors: { body: ['Internal server error'] } } });
       });
@@ -58,6 +74,8 @@ test.describe('Home page', () => {
   );
 
   test('MOCKED: Network abort with tags request', { tag: '@mock' }, async ({ homePage, page }) => {
+    await allure.feature(FEATURE.tags);
+    await allure.severity(allure.Severity.NORMAL);
     test.fail(true, 'BUG: Full empty page');
     await page.route('**/api/tags*', async (route) => {
       await route.abort();
@@ -71,6 +89,8 @@ test.describe('Home page', () => {
     'MOCKED: Network abort with Articles request',
     { tag: '@mock' },
     async ({ homePage, page }) => {
+      await allure.feature(FEATURE.articleList);
+      await allure.severity(allure.Severity.NORMAL);
       test.fail(true, 'BUG: Full empty page');
       await page.route('**/api/articles*', async (route) => {
         await route.abort();
@@ -85,6 +105,8 @@ test.describe('Home page', () => {
     'MOCKED: Pagination respond articles amount',
     { tag: '@mock' },
     async ({ homePage, page, user, request }) => {
+      await allure.feature(FEATURE.articleList);
+      await allure.severity(allure.Severity.NORMAL);
       await createArticle(request, user.token);
 
       await page.route('**/api/articles*', async (route) => {
@@ -105,6 +127,8 @@ test.describe('Home page', () => {
     'MOCKED: Loader is shown while articles are loading',
     { tag: '@mock' },
     async ({ homePage, page }) => {
+      await allure.feature(FEATURE.articleList);
+      await allure.severity(allure.Severity.MINOR);
       await page.route('**/api/articles*', async (route) => {
         await new Promise((resolve) => {
           setTimeout(resolve, 1500);
@@ -123,6 +147,8 @@ test.describe('Home page', () => {
     "MOCKED: Real possible valid article's data",
     { tag: '@mock' },
     async ({ homePage, page }) => {
+      await allure.feature(FEATURE.articleList);
+      await allure.severity(allure.Severity.NORMAL);
       const { body, ...articleData } = createArticleData();
       const article = {
         slug: generateArticleName(),
@@ -156,6 +182,8 @@ test.describe('Home page', () => {
     'MOCKED: Click on popular tag sends request with this tag',
     { tag: '@mock' },
     async ({ homePage, page }) => {
+      await allure.feature(FEATURE.tags);
+      await allure.severity(allure.Severity.NORMAL);
       const tag = generateTag();
       await page.route('**/api/tags*', async (route) => {
         await route.fulfill({ json: { tags: [tag] } });
@@ -175,6 +203,8 @@ test.describe('Home page', () => {
     user,
     request,
   }) => {
+    await allure.feature(FEATURE.tags);
+    await allure.severity(allure.Severity.CRITICAL);
     const article = await createArticle(request, user.token);
     const tag = article.tagList[0];
     await page.route('**/api/tags*', async (route) => {
