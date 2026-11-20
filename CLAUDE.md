@@ -51,7 +51,7 @@ React/Vite + Express + Sequelize + Postgres у Docker Compose.
 
 ## Прогрес
 
-Що зроблено, на чому зупинились, що далі, порядок читання мануалу — в окремому файлі.
-Сюди (CLAUDE.md) пишемо лише правила й довідку, а поточний стан і плани — у PROGRESS.md.
+Learning progress: PROGRESS.md (local, not in git) — use /progress to read
+or update it. Don't read it unless asked.
 
 @PROGRESS.md
