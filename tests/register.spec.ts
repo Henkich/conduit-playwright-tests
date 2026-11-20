@@ -7,12 +7,9 @@ import { EPIC, FEATURE } from '../helpers/allure';
 test.describe('Register', () => {
   test.use({ storageState: GUEST });
 
-  test.beforeEach(async () => {
+  test.beforeEach(async ({ registerPage }) => {
     await allure.epic(EPIC.auth);
     await allure.feature(FEATURE.registration);
-  });
-
-  test.beforeEach(async ({ registerPage }) => {
     await registerPage.open();
   });
 

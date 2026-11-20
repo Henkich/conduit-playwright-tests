@@ -13,6 +13,7 @@ test.describe('Session', () => {
 
   test('user can log out', async ({ page, navbar }) => {
     await allure.severity(allure.Severity.CRITICAL);
+
     await test.step('Opening main page', async () => {
       await page.goto('/#/');
       await expect(navbar.newArticleLink).toBeVisible();
