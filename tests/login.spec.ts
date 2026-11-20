@@ -8,11 +8,8 @@ import { EPIC, FEATURE } from '../helpers/allure';
 test.describe('Login', () => {
   test.use({ storageState: GUEST });
 
-  test.beforeEach(async () => {
-    await allure.epic(EPIC.auth);
-  });
-
   test.beforeEach(async ({ loginPage }) => {
+    await allure.epic(EPIC.auth);
     await loginPage.open();
   });
 

@@ -8,12 +8,9 @@ import { EPIC, FEATURE } from '../helpers/allure';
 test.describe('Article', () => {
   test.use({ storageState: AUTH_FILE });
 
-  test.beforeEach(async () => {
+  test.beforeEach(async ({ editorPage }) => {
     await allure.epic(EPIC.articles);
     await allure.feature(FEATURE.createArticle);
-  });
-
-  test.beforeEach(async ({ editorPage }) => {
     await editorPage.open();
   });
 
