@@ -54,6 +54,18 @@ jobs:
           path: playwright-report/
           retention-days: 14
 
+      - name: Generate Allure report
+        if: ${{ !cancelled() }}
+        run: npm run allure:generate
+
+      - name: Upload Allure report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-report
+          path: allure-report/
+          retention-days: 14
+
       - name: Show app logs on failure
         if: failure()
         working-directory: conduit-app

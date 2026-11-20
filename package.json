@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "pretest": "node -e \"require('fs').rmSync('allure-results', { recursive: true, force: true })\"",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "report": "playwright show-report",
@@ -11,7 +12,9 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc",
     "check": "npm run format:check && npm run lint && npm run typecheck",
-    "test:api": "playwright test --project=api"
+    "test:api": "playwright test --project=api",
+    "allure:generate": "allure generate allure-results --clean",
+    "allure:open": "allure open allure-report"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +24,9 @@
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.6.3",
+    "allure": "^3.22.1",
+    "allure-js-commons": "^3.15.0",
+    "allure-playwright": "^3.15.0",
     "dotenv": "^18.0.5",
     "eslint": "^10.12.0",
     "eslint-plugin-playwright": "^2.12.1",
