@@ -2,15 +2,23 @@
 import { test, expect } from '../fixtures';
 import { generateEmail } from '../helpers/data';
 import { GUEST } from '../helpers/auth';
+import * as allure from 'allure-js-commons';
+import { EPIC, FEATURE } from '../helpers/allure';
 
 test.describe('Login', () => {
   test.use({ storageState: GUEST });
+
+  test.beforeEach(async () => {
+    await allure.epic(EPIC.auth);
+  });
 
   test.beforeEach(async ({ loginPage }) => {
     await loginPage.open();
   });
 
   test('user can log in with valid credentials', async ({ page, navbar, user, loginPage }) => {
+    await allure.feature(FEATURE.login);
+    await allure.severity(allure.Severity.CRITICAL);
     await loginPage.login(user.email, user.password);
     await expect(page).toHaveURL(/\/#\/$/);
     await expect(navbar.newArticleLink).toBeVisible();
@@ -18,6 +26,8 @@ test.describe('Login', () => {
   });
 
   test('shows error for wrong password', async ({ page, loginPage, user }) => {
+    await allure.feature(FEATURE.login);
+    await allure.severity(allure.Severity.NORMAL);
     await loginPage.login(user.email, 'WrongPass1');
 
     await expect(loginPage.errorMessage).toBeVisible();
@@ -26,6 +36,8 @@ test.describe('Login', () => {
   });
 
   test('shows error for unknown email', async ({ page, loginPage, user }) => {
+    await allure.feature(FEATURE.login);
+    await allure.severity(allure.Severity.NORMAL);
     test.fail(
       true,
       'BUG: different error for unknown email reveals registered emails (user enumeration)',
@@ -39,6 +51,8 @@ test.describe('Login', () => {
   });
 
   test('empty password cannot be sent', async ({ page, loginPage }) => {
+    await allure.feature(FEATURE.login);
+    await allure.severity(allure.Severity.NORMAL);
     await loginPage.fillEmail(generateEmail());
     await loginPage.submitButton.click();
 
@@ -50,6 +64,8 @@ test.describe('Login', () => {
   });
 
   test('keeps user logged in after page reload', async ({ page, user, loginPage, navbar }) => {
+    await allure.feature(FEATURE.session);
+    await allure.severity(allure.Severity.NORMAL);
     await loginPage.login(user.email, user.password);
     await expect(page).toHaveURL(/\/#\/$/);
 

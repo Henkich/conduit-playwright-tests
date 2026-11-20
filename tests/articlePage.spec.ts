@@ -1,11 +1,16 @@
 import { test, expect } from '../fixtures';
 import { createArticle } from '../helpers/api';
 import { AUTH_FILE, GUEST } from '../helpers/auth';
+import * as allure from 'allure-js-commons';
+import { EPIC, FEATURE } from '../helpers/allure';
 
 test.describe('MyArticle', () => {
   test.use({ storageState: AUTH_FILE });
 
   test('Articles tags are visible and correct', async ({ articlePage, myArticle }) => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.viewArticle);
+    await allure.severity(allure.Severity.NORMAL);
     await articlePage.open(myArticle.slug);
 
     await expect(articlePage.tags).toHaveCount(myArticle.tagList.length);
@@ -19,6 +24,9 @@ test.describe('MyArticle', () => {
     articlePage,
     myArticle,
   }) => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.viewArticle);
+    await allure.severity(allure.Severity.NORMAL);
     await articlePage.open(myArticle.slug);
 
     await expect(articlePage.title).toHaveText(myArticle.title);
@@ -32,6 +40,9 @@ test.describe('MyArticle', () => {
   });
 
   test('User can delete own article', async ({ articlePage, myArticle, page }) => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.deleteArticle);
+    await allure.severity(allure.Severity.CRITICAL);
     await articlePage.open(myArticle.slug);
 
     page.once('dialog', async (dialog) => {
@@ -48,6 +59,9 @@ test.describe('MyArticle', () => {
   });
 
   test('User dismiss deleting own Article', async ({ page, myArticle, articlePage }) => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.deleteArticle);
+    await allure.severity(allure.Severity.NORMAL);
     await articlePage.open(myArticle.slug);
     page.once('dialog', async (dialog) => {
       expect(dialog.message()).toBe('Want to delete the article?');
@@ -67,6 +81,9 @@ test.describe('MyArticle', () => {
     editorPage,
     myArticle,
   }) => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.editArticle);
+    await allure.severity(allure.Severity.NORMAL);
     await articlePage.open(myArticle.slug);
     await articlePage.editArticleButton.click();
 
@@ -82,6 +99,9 @@ test.describe('Another Author Article', () => {
   test.use({ storageState: AUTH_FILE });
 
   test('Article of another Author', async ({ user, articlePage, request, page }) => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.viewArticle);
+    await allure.severity(allure.Severity.NORMAL);
     const article = await createArticle(request, user.token);
     await articlePage.open(article.slug);
 
@@ -96,6 +116,9 @@ test.describe('Another Author Article', () => {
   });
 
   test('Follow Author of the article', async ({ user, articlePage, request, page }) => {
+    await allure.epic(EPIC.profiles);
+    await allure.feature(FEATURE.follow);
+    await allure.severity(allure.Severity.CRITICAL);
     const article = await createArticle(request, user.token);
     await articlePage.open(article.slug);
 
@@ -109,6 +132,9 @@ test.describe('Another Author Article', () => {
   });
 
   test('Add to Favorite the Article', async ({ user, articlePage, request, page }) => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.favorites);
+    await allure.severity(allure.Severity.CRITICAL);
     const article = await createArticle(request, user.token);
     await articlePage.open(article.slug);
     await expect(page).toHaveURL(`/#/article/${article.slug}`);
@@ -125,6 +151,9 @@ test.describe('Another Author Article', () => {
   });
 
   test('Unfollow Author of the article', async ({ user, articlePage, request, page }) => {
+    await allure.epic(EPIC.profiles);
+    await allure.feature(FEATURE.follow);
+    await allure.severity(allure.Severity.NORMAL);
     const article = await createArticle(request, user.token);
     await articlePage.open(article.slug);
 
@@ -145,6 +174,9 @@ test.describe('Another Author Article', () => {
   });
 
   test('Unfavorite the article', async ({ user, articlePage, request, page }) => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.favorites);
+    await allure.severity(allure.Severity.NORMAL);
     const article = await createArticle(request, user.token);
     await articlePage.open(article.slug);
 
@@ -167,6 +199,9 @@ test.describe('Article for Guest', () => {
   test.use({ storageState: GUEST });
 
   test('Article page for Guest', async ({ page, user, articlePage, request }) => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.viewArticle);
+    await allure.severity(allure.Severity.NORMAL);
     const article = await createArticle(request, user.token);
     await articlePage.open(article.slug);
 
@@ -185,6 +220,9 @@ test.describe('Article for Guest', () => {
   });
 
   test('Guest cannot follow', async ({ page, user, articlePage, request }) => {
+    await allure.epic(EPIC.profiles);
+    await allure.feature(FEATURE.follow);
+    await allure.severity(allure.Severity.NORMAL);
     const article = await createArticle(request, user.token);
     await articlePage.open(article.slug);
     await expect(articlePage.title).toContainText(article.title);
@@ -199,6 +237,9 @@ test.describe('Article for Guest', () => {
   });
 
   test('Guest cannot add to Favorite', async ({ page, user, articlePage, request }) => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.favorites);
+    await allure.severity(allure.Severity.NORMAL);
     const article = await createArticle(request, user.token);
     await articlePage.open(article.slug);
     await expect(articlePage.title).toContainText(article.title);

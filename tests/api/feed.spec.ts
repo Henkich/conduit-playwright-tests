@@ -1,8 +1,16 @@
 import { test, expect } from '../../fixtures';
 import { createArticle, createUser } from '../../helpers/api';
+import * as allure from 'allure-js-commons';
+import { EPIC, FEATURE } from '../../helpers/allure';
 
 test.describe('GET /api/articles/feed', () => {
+  test.beforeEach(async () => {
+    await allure.epic(EPIC.articles);
+    await allure.feature(FEATURE.feed);
+  });
+
   test('Follow Author, Article in your feed', async ({ user, request }) => {
+    await allure.severity(allure.Severity.CRITICAL);
     const article = await createArticle(request, user.token);
     const followerUser = await createUser(request);
     const response = await request.post(`/api/profiles/${user.username}/follow`, {
@@ -37,6 +45,7 @@ test.describe('GET /api/articles/feed', () => {
   });
 
   test('Not followed authors articles arent in feed', async ({ user, request }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const followedAuthor = await createUser(request);
     await createArticle(request, followedAuthor.token);
     const otherAuthor = await createUser(request);
@@ -62,6 +71,7 @@ test.describe('GET /api/articles/feed', () => {
   });
 
   test('Feed articles for not logged in user', async ({ request }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const response = await request.get(`/api/articles/feed`, {});
     expect(response.status()).toBe(401);
     const json = await response.json();

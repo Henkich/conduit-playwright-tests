@@ -1,9 +1,17 @@
 import { test, expect } from '../../fixtures';
 import { createUserData } from '../../helpers/api';
 import { generateUsername } from '../../helpers/data';
+import * as allure from 'allure-js-commons';
+import { EPIC, FEATURE } from '../../helpers/allure';
 
 test.describe('POST /api/users/login', () => {
+  test.beforeEach(async () => {
+    await allure.epic(EPIC.auth);
+    await allure.feature(FEATURE.login);
+  });
+
   test('Return user with valid creds', async ({ request, user }) => {
+    await allure.severity(allure.Severity.CRITICAL);
     const response = await request.post('/api/users/login', {
       data: { user: { email: user.email, password: user.password } },
     });
@@ -23,6 +31,7 @@ test.describe('POST /api/users/login', () => {
   });
 
   test('Unexisted email', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     test.fail(true, 'Unexisted email return 404 instead of 422');
     const response = await request.post('/api/users/login', {
       data: { user: { email: '234@56234', password: user.password } },
@@ -37,6 +46,7 @@ test.describe('POST /api/users/login', () => {
   });
 
   test('Incorrect password', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     test.fail(true, 'wrong password return 422 instead of 401');
     const response = await request.post('/api/users/login', {
       data: { user: { email: user.email, password: '14d' } },
@@ -52,7 +62,13 @@ test.describe('POST /api/users/login', () => {
 });
 
 test.describe('GET /api/user', () => {
+  test.beforeEach(async () => {
+    await allure.epic(EPIC.auth);
+    await allure.feature(FEATURE.session);
+  });
+
   test('Return loggined user', async ({ request, user }) => {
+    await allure.severity(allure.Severity.CRITICAL);
     const response = await request.get('/api/user', {
       headers: { Authorization: `Token ${user.token}` },
     });
@@ -72,6 +88,7 @@ test.describe('GET /api/user', () => {
   });
 
   test('Return user with unloggined user', async ({ request }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const response = await request.get('/api/user', {});
 
     expect(response.status()).toBe(401);
@@ -85,6 +102,7 @@ test.describe('GET /api/user', () => {
   });
 
   test('Return user with unknown token', async ({ request }) => {
+    await allure.severity(allure.Severity.NORMAL);
     test.fail(true, '500 response code instead of 401');
     const response = await request.get('/api/user', {
       headers: { Authorization: `Token 345gj03430f304v3408g034f34f34yg34f34` },
@@ -97,6 +115,7 @@ test.describe('GET /api/user', () => {
   });
 
   test('Return user with monotoken', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     test.fail(true, '500 error insead of 401');
     const response = await request.get('/api/user', {
       headers: { Authorization: `Token${user.token}` },
@@ -109,7 +128,13 @@ test.describe('GET /api/user', () => {
 });
 
 test.describe('POST /api/users', () => {
+  test.beforeEach(async () => {
+    await allure.epic(EPIC.auth);
+    await allure.feature(FEATURE.registration);
+  });
+
   test('Successfully create the user', async ({ request }) => {
+    await allure.severity(allure.Severity.CRITICAL);
     const newUser = createUserData();
     const response = await request.post('/api/users', {
       data: {
@@ -132,6 +157,7 @@ test.describe('POST /api/users', () => {
   });
 
   test('Create User with same email', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     test.fail(true, 'using already existed email in user creation returns 422 instead of 409');
     const newUser = createUserData({ email: user.email });
     const response = await request.post('/api/users', {
@@ -147,6 +173,7 @@ test.describe('POST /api/users', () => {
   });
 
   test('Create User with same Username', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     test.fail(true, 'another user with same username CAN BE created');
     const newUser = createUserData({ username: user.username });
     const response = await request.post('/api/users', {
@@ -162,6 +189,7 @@ test.describe('POST /api/users', () => {
   });
 
   test('Create User with empty password', async ({ request }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const newUser = createUserData({ password: '' });
     const response = await request.post('/api/users', {
       data: {
@@ -177,7 +205,13 @@ test.describe('POST /api/users', () => {
 });
 
 test.describe('PUT /api/user', () => {
+  test.beforeEach(async () => {
+    await allure.epic(EPIC.auth);
+    await allure.feature(FEATURE.userSettings);
+  });
+
   test('Update users bio and image', async ({ request, user }) => {
+    await allure.severity(allure.Severity.CRITICAL);
     test.fail(true, '500 error after updating bio and image');
     const response = await request.put('/api/user', {
       headers: { Authorization: `Token ${user.token}` },
@@ -201,6 +235,7 @@ test.describe('PUT /api/user', () => {
   });
 
   test('Update users bio and image without token', async ({ request }) => {
+    await allure.severity(allure.Severity.NORMAL);
     const response = await request.put('/api/user', {
       data: {
         user: { bio: 'SomeManWithSword2', image: 'image.url2' },
@@ -214,6 +249,7 @@ test.describe('PUT /api/user', () => {
   });
 
   test('Update username with password', async ({ request, user }) => {
+    await allure.severity(allure.Severity.NORMAL);
     test.fail(true, 'email doesnt return in response after changing username');
     const uniqueName = generateUsername();
     const response = await request.put('/api/user', {
