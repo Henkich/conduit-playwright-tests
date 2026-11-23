@@ -3,12 +3,12 @@ import { createArticle, createUser } from '../../helpers/api';
 import * as allure from 'allure-js-commons';
 import { EPIC, FEATURE } from '../../helpers/allure';
 
-test.describe('GET /api/articles?author=', () => {
+test.describe('GET /api/articles', () => {
   test.beforeEach(async () => {
     await allure.epic(EPIC.articles);
   });
 
-  test('User filter by the auther', async ({ request, user }) => {
+  test('filters articles by author', async ({ request, user }) => {
     await allure.feature(FEATURE.articleList);
     await allure.severity(allure.Severity.NORMAL);
     test.fail(true, 'BUG: articlesCount counts article-tag rows, not articles');
@@ -29,7 +29,7 @@ test.describe('GET /api/articles?author=', () => {
     expect.soft(json.articlesCount).toBe(2);
   });
 
-  test('User filter by tag', async ({ request, user }) => {
+  test('filters articles by tag', async ({ request, user }) => {
     await allure.feature(FEATURE.tags);
     await allure.severity(allure.Severity.NORMAL);
     const creator = await createUser(request);

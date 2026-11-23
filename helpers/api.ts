@@ -43,7 +43,7 @@ export async function createArticle(
     headers: { Authorization: `Token ${token}` },
     data: { article },
   });
-  expect(response.ok(), 'Article should be created').toBeTruthy();
+  await expect(response, 'article should be created via API').toBeOK();
   const json = await response.json();
   return { ...article, slug: json.article.slug };
 }
@@ -64,7 +64,7 @@ export async function createUser(
 ): Promise<User> {
   const user = createUserData(overrides);
   const response = await request.post('/api/users', { data: { user } });
-  expect(response.ok(), 'user should be created via API').toBeTruthy();
+  await expect(response, 'user should be created via API').toBeOK();
   const json = await response.json();
   return { ...user, token: json.user.token };
 }

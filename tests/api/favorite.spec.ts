@@ -3,18 +3,18 @@ import { createArticle, createUser } from '../../helpers/api';
 import * as allure from 'allure-js-commons';
 import { EPIC, FEATURE } from '../../helpers/allure';
 
-test.describe('POST /api/articles/:slug/favorite', () => {
+test.describe('POST/DELETE /api/articles/:slug/favorite', () => {
   test.beforeEach(async () => {
     await allure.epic(EPIC.articles);
     await allure.feature(FEATURE.favorites);
   });
 
-  test('User add an Article to the Favorite', async ({ request, user }) => {
+  test('favorites an article', async ({ request, user }) => {
     await allure.severity(allure.Severity.CRITICAL);
     const article = await createArticle(request, user.token);
-    const adderFavorite = await createUser(request);
+    const reader = await createUser(request);
     const response = await request.post(`/api/articles/${article.slug}/favorite`, {
-      headers: { Authorization: `Token ${adderFavorite.token}` },
+      headers: { Authorization: `Token ${reader.token}` },
     });
 
     expect(response.status()).toBe(200);
@@ -36,32 +36,32 @@ test.describe('POST /api/articles/:slug/favorite', () => {
     });
     expect(json.article.tagList).toHaveLength(article.tagList.length);
 
-    const getAfterFav = await request.get(`/api/articles/${article.slug}`, {
-      headers: { Authorization: `Token ${adderFavorite.token}` },
+    const getResponse = await request.get(`/api/articles/${article.slug}`, {
+      headers: { Authorization: `Token ${reader.token}` },
     });
-    expect(getAfterFav.status()).toBe(200);
-    const json2 = await getAfterFav.json();
+    expect(getResponse.status()).toBe(200);
+    const getJson = await getResponse.json();
 
-    expect(json2.article).toMatchObject({
+    expect(getJson.article).toMatchObject({
       favorited: true,
       favoritesCount: 1,
     });
 
     // favorited is per viewer, favoritesCount is shared
-    const asGuest = await request.get(`/api/articles/${article.slug}`);
-    expect(asGuest.status()).toBe(200);
-    expect((await asGuest.json()).article).toMatchObject({
+    const guestResponse = await request.get(`/api/articles/${article.slug}`);
+    expect(guestResponse.status()).toBe(200);
+    expect((await guestResponse.json()).article).toMatchObject({
       favorited: false,
       favoritesCount: 1,
     });
   });
 
-  test('User unfavorite Article', async ({ request, user }) => {
+  test('unfavorites an article', async ({ request, user }) => {
     await allure.severity(allure.Severity.NORMAL);
     const article = await createArticle(request, user.token);
-    const adderFavorite = await createUser(request);
+    const reader = await createUser(request);
     const response = await request.post(`/api/articles/${article.slug}/favorite`, {
-      headers: { Authorization: `Token ${adderFavorite.token}` },
+      headers: { Authorization: `Token ${reader.token}` },
     });
 
     expect(response.status()).toBe(200);
@@ -69,13 +69,13 @@ test.describe('POST /api/articles/:slug/favorite', () => {
 
     expect(json.article.favorited).toBe(true);
 
-    const responseUNfavorite = await request.delete(`/api/articles/${article.slug}/favorite`, {
-      headers: { Authorization: `Token ${adderFavorite.token}` },
+    const unfavoriteResponse = await request.delete(`/api/articles/${article.slug}/favorite`, {
+      headers: { Authorization: `Token ${reader.token}` },
     });
-    expect(responseUNfavorite.status()).toBe(200);
-    const jsonunfav = await responseUNfavorite.json();
+    expect(unfavoriteResponse.status()).toBe(200);
+    const unfavoriteJson = await unfavoriteResponse.json();
 
-    expect(jsonunfav).toMatchObject({
+    expect(unfavoriteJson).toMatchObject({
       article: {
         ...article,
         tagList: expect.arrayContaining(article.tagList),
@@ -89,15 +89,15 @@ test.describe('POST /api/articles/:slug/favorite', () => {
         },
       },
     });
-    expect(jsonunfav.article.tagList).toHaveLength(article.tagList.length);
+    expect(unfavoriteJson.article.tagList).toHaveLength(article.tagList.length);
 
-    const getAfterUnFav = await request.get(`/api/articles/${article.slug}`, {
-      headers: { Authorization: `Token ${adderFavorite.token}` },
+    const getResponse = await request.get(`/api/articles/${article.slug}`, {
+      headers: { Authorization: `Token ${reader.token}` },
     });
-    expect(getAfterUnFav.status()).toBe(200);
-    const json2 = await getAfterUnFav.json();
+    expect(getResponse.status()).toBe(200);
+    const getJson = await getResponse.json();
 
-    expect(json2.article).toMatchObject({
+    expect(getJson.article).toMatchObject({
       favorited: false,
       favoritesCount: 0,
     });

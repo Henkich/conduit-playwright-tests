@@ -1,6 +1,6 @@
 import { test, expect } from '../../fixtures';
 import { createUserData } from '../../helpers/api';
-import { generateUsername } from '../../helpers/data';
+import { generateEmail, generateUsername } from '../../helpers/data';
 import * as allure from 'allure-js-commons';
 import { EPIC, FEATURE } from '../../helpers/allure';
 
@@ -10,7 +10,7 @@ test.describe('POST /api/users/login', () => {
     await allure.feature(FEATURE.login);
   });
 
-  test('Return user with valid creds', async ({ request, user }) => {
+  test('logs in with valid credentials', async ({ request, user }) => {
     await allure.severity(allure.Severity.CRITICAL);
     const response = await request.post('/api/users/login', {
       data: { user: { email: user.email, password: user.password } },
@@ -30,24 +30,26 @@ test.describe('POST /api/users/login', () => {
     });
   });
 
-  test('Unexisted email', async ({ request, user }) => {
+  // Same response as for a wrong password, so the API doesn't reveal which emails are registered
+  test('returns the same error for an unknown email as for a wrong password', async ({
+    request,
+    user,
+  }) => {
     await allure.severity(allure.Severity.NORMAL);
-    test.fail(true, 'Unexisted email return 404 instead of 422');
+    test.fail(true, 'BUG: returns 404 "Email not found sign in first" (user enumeration)');
     const response = await request.post('/api/users/login', {
-      data: { user: { email: '234@56234', password: user.password } },
+      data: { user: { email: generateEmail(), password: user.password } },
     });
-    expect(response.status()).toBe(422);
-    const json = await response.json();
 
-    expect(json.errors).toBeDefined();
-    expect(json).toEqual({
-      errors: { body: ['Email not found sign in first'] },
+    expect(response.status()).toBe(401);
+    expect(await response.json()).toEqual({
+      errors: { body: ['Wrong email/password combination'] },
     });
   });
 
-  test('Incorrect password', async ({ request, user }) => {
+  test('returns 401 for a wrong password', async ({ request, user }) => {
     await allure.severity(allure.Severity.NORMAL);
-    test.fail(true, 'wrong password return 422 instead of 401');
+    test.fail(true, 'BUG: returns 422 instead of 401');
     const response = await request.post('/api/users/login', {
       data: { user: { email: user.email, password: '14d' } },
     });
@@ -67,7 +69,7 @@ test.describe('GET /api/user', () => {
     await allure.feature(FEATURE.session);
   });
 
-  test('Return loggined user', async ({ request, user }) => {
+  test('returns the current user for a valid token', async ({ request, user }) => {
     await allure.severity(allure.Severity.CRITICAL);
     const response = await request.get('/api/user', {
       headers: { Authorization: `Token ${user.token}` },
@@ -87,9 +89,9 @@ test.describe('GET /api/user', () => {
     });
   });
 
-  test('Return user with unloggined user', async ({ request }) => {
+  test('returns 401 without token', async ({ request }) => {
     await allure.severity(allure.Severity.NORMAL);
-    const response = await request.get('/api/user', {});
+    const response = await request.get('/api/user');
 
     expect(response.status()).toBe(401);
     const json = await response.json();
@@ -101,9 +103,9 @@ test.describe('GET /api/user', () => {
     });
   });
 
-  test('Return user with unknown token', async ({ request }) => {
+  test('returns 401 for a forged token', async ({ request }) => {
     await allure.severity(allure.Severity.NORMAL);
-    test.fail(true, '500 response code instead of 401');
+    test.fail(true, 'BUG: returns 500 instead of 401');
     const response = await request.get('/api/user', {
       headers: { Authorization: `Token 345gj03430f304v3408g034f34f34yg34f34` },
     });
@@ -114,9 +116,9 @@ test.describe('GET /api/user', () => {
     expect(json.errors).toBeDefined();
   });
 
-  test('Return user with monotoken', async ({ request, user }) => {
+  test('returns 401 for a malformed Authorization header', async ({ request, user }) => {
     await allure.severity(allure.Severity.NORMAL);
-    test.fail(true, '500 error insead of 401');
+    test.fail(true, 'BUG: returns 500 instead of 401');
     const response = await request.get('/api/user', {
       headers: { Authorization: `Token${user.token}` },
     });
@@ -133,7 +135,7 @@ test.describe('POST /api/users', () => {
     await allure.feature(FEATURE.registration);
   });
 
-  test('Successfully create the user', async ({ request }) => {
+  test('registers a new user', async ({ request }) => {
     await allure.severity(allure.Severity.CRITICAL);
     const newUser = createUserData();
     const response = await request.post('/api/users', {
@@ -156,9 +158,9 @@ test.describe('POST /api/users', () => {
     });
   });
 
-  test('Create User with same email', async ({ request, user }) => {
+  test('returns 409 for a taken email', async ({ request, user }) => {
     await allure.severity(allure.Severity.NORMAL);
-    test.fail(true, 'using already existed email in user creation returns 422 instead of 409');
+    test.fail(true, 'BUG: returns 422 instead of 409');
     const newUser = createUserData({ email: user.email });
     const response = await request.post('/api/users', {
       data: {
@@ -172,9 +174,9 @@ test.describe('POST /api/users', () => {
     expect(json.errors).toBeDefined();
   });
 
-  test('Create User with same Username', async ({ request, user }) => {
+  test('returns 409 for a taken username', async ({ request, user }) => {
     await allure.severity(allure.Severity.NORMAL);
-    test.fail(true, 'another user with same username CAN BE created');
+    test.fail(true, 'BUG: a duplicate username is accepted');
     const newUser = createUserData({ username: user.username });
     const response = await request.post('/api/users', {
       data: {
@@ -188,7 +190,7 @@ test.describe('POST /api/users', () => {
     expect(json.errors).toBeDefined();
   });
 
-  test('Create User with empty password', async ({ request }) => {
+  test('returns 422 for an empty password', async ({ request }) => {
     await allure.severity(allure.Severity.NORMAL);
     const newUser = createUserData({ password: '' });
     const response = await request.post('/api/users', {
@@ -210,9 +212,9 @@ test.describe('PUT /api/user', () => {
     await allure.feature(FEATURE.userSettings);
   });
 
-  test('Update users bio and image', async ({ request, user }) => {
+  test('updates bio and image', async ({ request, user }) => {
     await allure.severity(allure.Severity.CRITICAL);
-    test.fail(true, '500 error after updating bio and image');
+    test.fail(true, 'BUG: returns 500 when the request has no password');
     const response = await request.put('/api/user', {
       headers: { Authorization: `Token ${user.token}` },
       data: {
@@ -234,7 +236,7 @@ test.describe('PUT /api/user', () => {
     });
   });
 
-  test('Update users bio and image without token', async ({ request }) => {
+  test('returns 401 without token', async ({ request }) => {
     await allure.severity(allure.Severity.NORMAL);
     const response = await request.put('/api/user', {
       data: {
@@ -248,9 +250,9 @@ test.describe('PUT /api/user', () => {
     expect(json.errors).toBeDefined();
   });
 
-  test('Update username with password', async ({ request, user }) => {
+  test('updates the username', async ({ request, user }) => {
     await allure.severity(allure.Severity.NORMAL);
-    test.fail(true, 'email doesnt return in response after changing username');
+    test.fail(true, 'BUG: the response has no email');
     const uniqueName = generateUsername();
     const response = await request.put('/api/user', {
       headers: { Authorization: `Token ${user.token}` },

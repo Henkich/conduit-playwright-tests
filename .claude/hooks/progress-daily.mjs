@@ -1,4 +1,4 @@
-// SessionStart: once per day, inject "На чому зупинились" from PROGRESS.md
+// SessionStart: once per day, inject "Where we stopped" from PROGRESS.md
 // into Claude's context. Later sessions the same day get nothing.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -12,11 +12,11 @@ if (!existsSync(progressFile)) process.exit(0);
 if (existsSync(stampFile) && readFileSync(stampFile, 'utf8').trim() === today) process.exit(0);
 
 const text = readFileSync(progressFile, 'utf8');
-const match = text.match(/## На чому зупинились\s*\n([\s\S]*?)(?=\n## |$)/);
+const match = text.match(/## Where we stopped\s*\n([\s\S]*?)(?=\n## |$)/);
 if (!match) process.exit(0);
 
 console.log(
-  `First session today. From PROGRESS.md, section "На чому зупинились":\n\n` +
+  `First session today. From PROGRESS.md, section "Where we stopped":\n\n` +
     `${match[1].trim()}\n\n` +
     `In your first reply, briefly (2–3 lines) remind the user where we stopped and ` +
     `the next step, then handle their message. Don't start the next step unless asked.`,

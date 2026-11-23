@@ -14,12 +14,12 @@ test.describe('Session', () => {
   test('user can log out', async ({ page, navbar }) => {
     await allure.severity(allure.Severity.CRITICAL);
 
-    await test.step('Opening main page', async () => {
+    await test.step('Open the home page', async () => {
       await page.goto('/#/');
       await expect(navbar.newArticleLink).toBeVisible();
     });
 
-    await test.step('logout', async () => {
+    await test.step('Log out', async () => {
       await navbar.logout();
       await expect(page).toHaveURL(/\/#\/$/);
       await expect(navbar.loginLink).toBeVisible();
@@ -27,7 +27,7 @@ test.describe('Session', () => {
       await expect(navbar.newArticleLink).toBeHidden();
     });
 
-    await test.step('reload', async () => {
+    await test.step('Reload the page', async () => {
       await page.reload();
       await expect(page).toHaveURL(/\/#\/$/);
       await expect(navbar.loginLink).toBeVisible();

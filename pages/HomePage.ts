@@ -3,7 +3,7 @@ import { BasePage } from './BasePage';
 
 export class HomePage extends BasePage {
   readonly noArticlesMessage: Locator;
-  readonly noTagsMessages: Locator;
+  readonly noTagsMessage: Locator;
   readonly globalFeedTab: Locator;
   readonly navPagination: Locator;
   readonly loadingArticles: Locator;
@@ -17,7 +17,7 @@ export class HomePage extends BasePage {
   constructor(page: Page) {
     super(page);
     this.noArticlesMessage = page.getByText('Articles not available.');
-    this.noTagsMessages = page.getByText('Tags list not available');
+    this.noTagsMessage = page.getByText('Tags list not available');
     this.globalFeedTab = page.getByRole('button', { name: 'Global Feed' });
     this.navPagination = page.getByRole('navigation', { name: 'Pagination' });
     this.loadingArticles = page.getByText('Loading articles list...');

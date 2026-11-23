@@ -4,79 +4,17 @@
 
 UI and API tests for [Conduit](https://github.com/Henkich/conduit-app), a RealWorld
 Medium clone (React + Express + PostgreSQL), written with Playwright and TypeScript.
-A learning project. The application under test lives in a separate repository and runs
-locally in Docker.
+The application under test lives in a separate repository and runs locally in Docker.
 
 ## Tech stack
 
 - [Playwright Test](https://playwright.dev/) + TypeScript
-- Page Object Model and custom Playwright fixtures
-- Authentication via `storageState` (log in once in a setup project)
-- Prettier, ESLint (`eslint-plugin-playwright`), `tsc` type checking
-- API tests in a separate Playwright project, checked against the RealWorld OpenAPI spec
-- GitHub Actions: on every pull request the app is started in Docker and the full suite runs
-
-## What is covered
-
-### UI
-
-| Area          | Scenarios                                                                                                                  |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Login         | valid login, wrong password, unknown email, empty password (native validation)                                             |
-| Session       | session survives page reload, logout clears the session                                                                    |
-| Register      | successful sign-up, already registered email                                                                               |
-| Home          | logo and global feed are shown                                                                                             |
-| Articles      | editor form, publish with/without tags, empty title, duplicate title, non-latin title, guest redirect                      |
-| Own article   | title, body and author buttons, delete (confirm accepted), cancel delete (confirm dismissed), edit opens prefilled editor  |
-| Other author  | follow and favorite instead of edit and delete, follow/unfollow author, favorite/unfavorite article, state survives reload |
-| Guest         | article without author buttons, sign-in prompt for comments, follow/favorite ask to log in                                 |
-| Accessibility | axe scan (WCAG A/AA) of login, register and home; known violations are separate `test.fail` tests                          |
-
-### API
-
-Requests go straight to the backend, no browser. Responses are checked against the
-[RealWorld OpenAPI spec](docs/realworld-openapi.yml): status code and response shape.
-
-| Endpoint                                     | Scenarios                                                                       |
-| -------------------------------------------- | ------------------------------------------------------------------------------- |
-| `POST /api/users/login`                      | valid credentials, wrong password, unknown email                                |
-| `POST /api/users`                            | sign-up, taken email, taken username, empty password                            |
-| `GET /api/user`                              | valid token, no token, forged token, malformed `Authorization` header           |
-| `PUT /api/user`                              | update bio and image, update username, no token                                 |
-| `GET /api/profiles/:username`                | profile, unknown user                                                           |
-| `POST/DELETE /api/profiles/:username/follow` | follow, unfollow, no token                                                      |
-| `POST /api/articles`                         | create, no token, empty title, duplicate title, no or non-array `tagList`       |
-| `GET /api/articles/:slug`                    | existing article, unknown slug                                                  |
-| `PUT /api/articles/:slug`                    | author updates body or title (new slug), other user 403, no token, unknown slug |
-| `DELETE /api/articles/:slug`                 | author deletes, other user 403, no token, unknown slug                          |
-| `POST/DELETE /api/articles/:slug/favorite`   | favorite, unfavorite, `favorited` per viewer                                    |
-| `GET /api/articles`                          | filter by author, filter by tag                                                 |
-
-## Known application bugs
-
-Tests describe the **expected** behaviour. A test that fails because of an application bug is
-marked with `test.fail()`, so the suite stays green and the bug stays visible in the report:
-
-- **User enumeration on login**: an unknown email shows "Email not found", while a wrong password
-  shows "Wrong email/password combination". Both cases should return the same message.
-- **Non-latin titles collide in the slug**: every non-latin character becomes `-`, so different
-  Cyrillic titles of the same length get the same slug and the second one is rejected as
-  "Title already exists".
-- **API differs from the spec**: wrong login credentials return 422 instead of 401, a taken email
-  returns 422 instead of 409, and an invalid or malformed token returns 500 instead of 401.
-- **Duplicate usernames are allowed**: sign-up checks only the email, so two users can share a
-  username, while profiles and follows are looked up by username.
-- **Updating a user without a password returns 500**: the password check uses `||` instead of
-  `&&`, so the server always tries to hash a password. The update response also has no `email`.
-- **Article creation is not validated**: without `tagList` the server returns 500 instead of 201,
-  and a string `tagList` is accepted and echoed back in the response, while no tags are saved.
-- **`articlesCount` is wrong**: the article list counts article-tag rows, so an author with two
-  articles of three tags each gets `articlesCount: 6`.
-- **`DELETE /api/articles/:slug` returns 200 with a body** instead of 204 from the spec.
-- **Article author is saved after the 201 response** (`setAuthor` without `await`): an immediate
-  GET of the new article sometimes returns 500, which makes the "publish article" UI tests flaky.
-- **Accessibility (axe, WCAG AA)**: grey and green text (nav links, article meta, tags, the green
-  button and links) is below the 4.5:1 contrast ratio; pagination `<li>` items have no `<ul>`.
+- Page Object Model and custom fixtures
+- API tests checked against the [RealWorld OpenAPI spec](docs/realworld-openapi.yml)
+- Network mocking (`page.route`), accessibility checks with [axe](https://github.com/dequelabs/axe-core)
+- Allure and Playwright HTML reports
+- Prettier, ESLint (`eslint-plugin-playwright`), `tsc`
+- GitHub Actions
 
 ## Getting started
 
@@ -109,33 +47,46 @@ npm test
 
 ## Scripts
 
-| Command             | What it does                                    |
-| ------------------- | ----------------------------------------------- |
-| `npm test`          | run all tests (setup + chromium + api)          |
-| `npm run test:ui`   | open Playwright UI mode                         |
-| `npm run test:api`  | run only API tests                              |
-| `npm run report`    | open the HTML report of the last run            |
-| `npm run check`     | Prettier check + ESLint + TypeScript type check |
-| `npm run format`    | format all files with Prettier                  |
-| `npm run lint`      | run ESLint                                      |
-| `npm run typecheck` | run `tsc`                                       |
+| Command                   | What it does                                    |
+| ------------------------- | ----------------------------------------------- |
+| `npm test`                | run all tests                                   |
+| `npm run test:api`        | run only API tests                              |
+| `npm run test:ui`         | open Playwright UI mode                         |
+| `npm run check`           | Prettier check + ESLint + TypeScript type check |
+| `npm run format`          | format all files with Prettier                  |
+| `npm run report`          | open the HTML report of the last run            |
+| `npm run allure:generate` | build the Allure report from the last run       |
+| `npm run allure:open`     | open the Allure report                          |
+
+Run a subset by tag: `npx playwright test --grep @mock` (mocked network) or `--grep @a11y`
+(accessibility).
 
 ## Project structure
 
 ```
 tests/          UI specs; auth.setup.ts logs in once and saves storageState
 tests/api/      API specs (no browser)
-docs/           RealWorld OpenAPI spec used as the API contract
 pages/          Page Objects: locators and user actions, no assertions
 fixtures/       custom fixtures: page objects, an API-created user and article
-helpers/        API helpers, test data generators, auth state
+helpers/        API helpers, test data generators, auth state, Allure labels
+docs/           RealWorld OpenAPI spec used as the API contract
 .github/        CI workflow
 ```
 
+Playwright projects: `setup` (login), `chromium` (UI tests, depend on `setup`), `api`.
+
 ## Conventions
 
-- Every `describe` declares its auth state explicitly:
-  `test.use({ storageState: GUEST })` or `test.use({ storageState: AUTH_FILE })`.
-- Test data is created per test through the API, so tests are independent and run in parallel.
-- Login and session tests log in through the UI; other tests that need a user reuse `storageState`.
-- Commits follow [Conventional Commits](https://www.conventionalcommits.org/); changes go through pull requests.
+- Every `describe` declares its auth state: `test.use({ storageState: GUEST })` or
+  `test.use({ storageState: AUTH_FILE })`.
+- Each test creates its own data through the API, so tests are independent and run in parallel.
+- Tests describe the expected behaviour. A test that fails because of a known application bug is
+  marked with `test.fail(true, 'BUG: ...')`: the suite stays green, and the test turns red once
+  the bug is fixed.
+- Changes go through pull requests; commits follow
+  [Conventional Commits](https://www.conventionalcommits.org/).
+
+## CI
+
+Every push to `main` and every pull request: code checks, then the app is started in Docker and
+the full suite runs. The Playwright HTML and Allure reports are uploaded as workflow artifacts.

@@ -5,7 +5,7 @@ import { createArticleData } from '../helpers/api';
 import * as allure from 'allure-js-commons';
 import { EPIC, FEATURE } from '../helpers/allure';
 
-test.describe('Article', () => {
+test.describe('Article editor', () => {
   test.use({ storageState: AUTH_FILE });
 
   test.beforeEach(async ({ editorPage }) => {
@@ -14,7 +14,7 @@ test.describe('Article', () => {
     await editorPage.open();
   });
 
-  test('user open editor page and see all fields', async ({ editorPage }) => {
+  test('editor shows all article fields', async ({ editorPage }) => {
     await allure.severity(allure.Severity.MINOR);
     await expect(editorPage.titleInput).toBeVisible();
     await expect(editorPage.descriptionInput).toBeVisible();
@@ -23,7 +23,7 @@ test.describe('Article', () => {
     await expect(editorPage.publishButton).toBeVisible();
   });
 
-  test('user can publish article with valid data', async ({ editorPage, page }) => {
+  test('user can publish an article', async ({ editorPage, page }) => {
     await allure.severity(allure.Severity.CRITICAL);
     const article = createArticleData();
 
@@ -39,15 +39,23 @@ test.describe('Article', () => {
     await expect(page.getByRole('heading', { name: article.title })).toBeVisible();
   });
 
-  test('user can publish article without tags', async ({ editorPage, page }) => {
+  test('user can publish an article without tags', async ({ editorPage, page }) => {
     await allure.severity(allure.Severity.NORMAL);
     const article = createArticleData({ tagList: [] });
+
+    const responsePromise = page.waitForResponse(
+      (res) => res.url().endsWith('/api/articles') && res.request().method() === 'POST',
+    );
     await editorPage.publish(article);
-    await expect(page).toHaveURL(`/#/article/${article.title.toLowerCase()}`);
+
+    const response = await responsePromise;
+    const json = await response.json();
+
+    await expect(page).toHaveURL(`/#/article/${json.article.slug}`);
     await expect(page.getByRole('heading', { name: article.title })).toBeVisible();
   });
 
-  test('user cannot publish article with empty title', async ({ editorPage, page }) => {
+  test('user cannot publish an article with an empty title', async ({ editorPage, page }) => {
     await allure.severity(allure.Severity.NORMAL);
     const article = createArticleData({ title: '' });
     await editorPage.publish(article);
@@ -59,12 +67,20 @@ test.describe('Article', () => {
     await expect(page).toHaveURL(/\/#\/editor$/);
   });
 
-  test('2 articles with same title cannot be published', async ({ editorPage, page }) => {
+  test('user cannot publish two articles with the same title', async ({ editorPage, page }) => {
     await allure.severity(allure.Severity.NORMAL);
     const title = generateArticleName();
     const article = createArticleData({ title: title });
+
+    const responsePromise = page.waitForResponse(
+      (res) => res.url().endsWith('/api/articles') && res.request().method() === 'POST',
+    );
     await editorPage.publish(article);
-    await expect(page).toHaveURL(`/#/article/${article.title.toLowerCase()}`);
+
+    const response = await responsePromise;
+    const json = await response.json();
+
+    await expect(page).toHaveURL(`/#/article/${json.article.slug}`);
     await expect(page.getByRole('heading', { name: article.title })).toBeVisible();
 
     await editorPage.open();
@@ -76,7 +92,7 @@ test.describe('Article', () => {
     await expect(page).toHaveURL(/\/#\/editor$/);
   });
 
-  test('article with non-english title can be published', async ({ editorPage, page }) => {
+  test('user can publish an article with a non-latin title', async ({ editorPage, page }) => {
     await allure.severity(allure.Severity.NORMAL);
     const title = `Як козаки їхали в Тайланд${uniqueId()}`;
     const article = createArticleData({ title: title });
@@ -91,12 +107,12 @@ test.describe('Article', () => {
     await expect(page.getByRole('heading', { name: article.title })).toBeVisible();
   });
 
-  test('articles with non-english different titles but same characters can be published', async ({
+  test('user can publish two different non-latin titles of the same length', async ({
     editorPage,
     page,
   }) => {
     await allure.severity(allure.Severity.NORMAL);
-    test.fail(true, 'Bug: different non-english characters are count as same characters');
+    test.fail(true, 'BUG: non-latin titles of the same length get the same slug');
     const id = uniqueId();
     const title1 = `Кіт${id}`;
     const article = createArticleData({ title: title1 });
@@ -114,7 +130,7 @@ test.describe('Article', () => {
   });
 });
 
-test.describe('Article (guest)', () => {
+test.describe('Article editor (guest)', () => {
   test.use({ storageState: GUEST });
 
   test.beforeEach(async () => {
@@ -122,7 +138,7 @@ test.describe('Article (guest)', () => {
     await allure.feature(FEATURE.createArticle);
   });
 
-  test('guest cannot open editor page', async ({ editorPage, page }) => {
+  test('guest cannot open the editor', async ({ editorPage, page }) => {
     await allure.severity(allure.Severity.NORMAL);
     await editorPage.open();
 

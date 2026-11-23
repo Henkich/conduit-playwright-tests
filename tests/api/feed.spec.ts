@@ -9,20 +9,20 @@ test.describe('GET /api/articles/feed', () => {
     await allure.feature(FEATURE.feed);
   });
 
-  test('Follow Author, Article in your feed', async ({ user, request }) => {
+  test("shows the followed author's article", async ({ user, request }) => {
     await allure.severity(allure.Severity.CRITICAL);
     const article = await createArticle(request, user.token);
-    const followerUser = await createUser(request);
+    const follower = await createUser(request);
     const response = await request.post(`/api/profiles/${user.username}/follow`, {
-      headers: { Authorization: `Token ${followerUser.token}` },
+      headers: { Authorization: `Token ${follower.token}` },
     });
     expect(response.status()).toBe(200);
 
-    const getArticles = await request.get(`/api/articles/feed`, {
-      headers: { Authorization: `Token ${followerUser.token}` },
+    const feedResponse = await request.get(`/api/articles/feed`, {
+      headers: { Authorization: `Token ${follower.token}` },
     });
-    expect(getArticles.status()).toBe(200);
-    const json = await getArticles.json();
+    expect(feedResponse.status()).toBe(200);
+    const json = await feedResponse.json();
     expect(json.articles).toHaveLength(1);
     expect(json).toMatchObject({
       articles: [
@@ -44,7 +44,7 @@ test.describe('GET /api/articles/feed', () => {
     expect(json.articles[0].tagList).toHaveLength(article.tagList.length);
   });
 
-  test('Not followed authors articles arent in feed', async ({ user, request }) => {
+  test('does not show articles of authors the user does not follow', async ({ user, request }) => {
     await allure.severity(allure.Severity.NORMAL);
     const followedAuthor = await createUser(request);
     await createArticle(request, followedAuthor.token);
@@ -56,11 +56,11 @@ test.describe('GET /api/articles/feed', () => {
     });
     expect(response.status()).toBe(200);
 
-    const getArticles = await request.get(`/api/articles/feed`, {
+    const feedResponse = await request.get(`/api/articles/feed`, {
       headers: { Authorization: `Token ${user.token}` },
     });
-    expect(getArticles.status()).toBe(200);
-    const json = await getArticles.json();
+    expect(feedResponse.status()).toBe(200);
+    const json = await feedResponse.json();
     expect(json.articles).toHaveLength(1);
     expect(
       json.articles.every(
@@ -70,9 +70,9 @@ test.describe('GET /api/articles/feed', () => {
     ).toBe(true);
   });
 
-  test('Feed articles for not logged in user', async ({ request }) => {
+  test('returns 401 without token', async ({ request }) => {
     await allure.severity(allure.Severity.NORMAL);
-    const response = await request.get(`/api/articles/feed`, {});
+    const response = await request.get(`/api/articles/feed`);
     expect(response.status()).toBe(401);
     const json = await response.json();
     expect(json.errors).toBeDefined();

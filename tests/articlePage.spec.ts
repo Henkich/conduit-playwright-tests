@@ -4,10 +4,10 @@ import { AUTH_FILE, GUEST } from '../helpers/auth';
 import * as allure from 'allure-js-commons';
 import { EPIC, FEATURE } from '../helpers/allure';
 
-test.describe('MyArticle', () => {
+test.describe('Own article', () => {
   test.use({ storageState: AUTH_FILE });
 
-  test('Articles tags are visible and correct', async ({ articlePage, myArticle }) => {
+  test('shows all article tags', async ({ articlePage, myArticle }) => {
     await allure.epic(EPIC.articles);
     await allure.feature(FEATURE.viewArticle);
     await allure.severity(allure.Severity.NORMAL);
@@ -20,7 +20,7 @@ test.describe('MyArticle', () => {
     }
   });
 
-  test('Articles elements are visible after creating own article', async ({
+  test('author sees the article with edit and delete buttons', async ({
     articlePage,
     myArticle,
   }) => {
@@ -39,7 +39,7 @@ test.describe('MyArticle', () => {
     await expect(articlePage.commentInput).toBeVisible();
   });
 
-  test('User can delete own article', async ({ articlePage, myArticle, page }) => {
+  test('author can delete the article', async ({ articlePage, myArticle, page }) => {
     await allure.epic(EPIC.articles);
     await allure.feature(FEATURE.deleteArticle);
     await allure.severity(allure.Severity.CRITICAL);
@@ -58,7 +58,11 @@ test.describe('MyArticle', () => {
     await expect(page.getByRole('link', { name: 'Go to home page' })).toBeVisible();
   });
 
-  test('User dismiss deleting own Article', async ({ page, myArticle, articlePage }) => {
+  test('article stays when the author cancels deletion', async ({
+    page,
+    myArticle,
+    articlePage,
+  }) => {
     await allure.epic(EPIC.articles);
     await allure.feature(FEATURE.deleteArticle);
     await allure.severity(allure.Severity.NORMAL);
@@ -75,7 +79,7 @@ test.describe('MyArticle', () => {
     await expect(articlePage.editArticleButton).toBeVisible();
   });
 
-  test('User can open edit page for own article', async ({
+  test('author can open the prefilled editor', async ({
     page,
     articlePage,
     editorPage,
@@ -95,10 +99,15 @@ test.describe('MyArticle', () => {
   });
 });
 
-test.describe('Another Author Article', () => {
+test.describe("Another author's article", () => {
   test.use({ storageState: AUTH_FILE });
 
-  test('Article of another Author', async ({ user, articlePage, request, page }) => {
+  test('user sees follow and favorite instead of edit and delete', async ({
+    user,
+    articlePage,
+    request,
+    page,
+  }) => {
     await allure.epic(EPIC.articles);
     await allure.feature(FEATURE.viewArticle);
     await allure.severity(allure.Severity.NORMAL);
@@ -115,7 +124,7 @@ test.describe('Another Author Article', () => {
     await expect(articlePage.editArticleButton).toBeHidden();
   });
 
-  test('Follow Author of the article', async ({ user, articlePage, request, page }) => {
+  test('user can follow the author', async ({ user, articlePage, request, page }) => {
     await allure.epic(EPIC.profiles);
     await allure.feature(FEATURE.follow);
     await allure.severity(allure.Severity.CRITICAL);
@@ -131,7 +140,7 @@ test.describe('Another Author Article', () => {
     await expect(articlePage.followButton).toContainText(`Unfollow ${user.username} ( 1 )`);
   });
 
-  test('Add to Favorite the Article', async ({ user, articlePage, request, page }) => {
+  test('user can favorite the article', async ({ user, articlePage, request, page }) => {
     await allure.epic(EPIC.articles);
     await allure.feature(FEATURE.favorites);
     await allure.severity(allure.Severity.CRITICAL);
@@ -150,7 +159,7 @@ test.describe('Another Author Article', () => {
     await expect(articlePage.favoriteButton).toHaveClass(/active/);
   });
 
-  test('Unfollow Author of the article', async ({ user, articlePage, request, page }) => {
+  test('user can unfollow the author', async ({ user, articlePage, request, page }) => {
     await allure.epic(EPIC.profiles);
     await allure.feature(FEATURE.follow);
     await allure.severity(allure.Severity.NORMAL);
@@ -173,7 +182,7 @@ test.describe('Another Author Article', () => {
     await expect(articlePage.followButton).not.toContainText('Unfollow');
   });
 
-  test('Unfavorite the article', async ({ user, articlePage, request, page }) => {
+  test('user can unfavorite the article', async ({ user, articlePage, request, page }) => {
     await allure.epic(EPIC.articles);
     await allure.feature(FEATURE.favorites);
     await allure.severity(allure.Severity.NORMAL);
@@ -195,10 +204,15 @@ test.describe('Another Author Article', () => {
   });
 });
 
-test.describe('Article for Guest', () => {
+test.describe('Article (guest)', () => {
   test.use({ storageState: GUEST });
 
-  test('Article page for Guest', async ({ page, user, articlePage, request }) => {
+  test('guest sees the article without edit, delete and comment controls', async ({
+    page,
+    user,
+    articlePage,
+    request,
+  }) => {
     await allure.epic(EPIC.articles);
     await allure.feature(FEATURE.viewArticle);
     await allure.severity(allure.Severity.NORMAL);
@@ -219,7 +233,7 @@ test.describe('Article for Guest', () => {
     await expect(articlePage.guestText).toBeVisible();
   });
 
-  test('Guest cannot follow', async ({ page, user, articlePage, request }) => {
+  test('guest cannot follow the author', async ({ page, user, articlePage, request }) => {
     await allure.epic(EPIC.profiles);
     await allure.feature(FEATURE.follow);
     await allure.severity(allure.Severity.NORMAL);
@@ -236,7 +250,7 @@ test.describe('Article for Guest', () => {
     await expect(articlePage.followButton).toContainText(' Followers ( 0 ) ');
   });
 
-  test('Guest cannot add to Favorite', async ({ page, user, articlePage, request }) => {
+  test('guest cannot favorite the article', async ({ page, user, articlePage, request }) => {
     await allure.epic(EPIC.articles);
     await allure.feature(FEATURE.favorites);
     await allure.severity(allure.Severity.NORMAL);
