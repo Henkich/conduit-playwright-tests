@@ -26,10 +26,10 @@ PROGRESS.md is the user's local learning journal. It is in .gitignore — never 
 
 1. Read PROGRESS.md.
 2. Report briefly (max ~10 lines):
-   - where we stopped (section "На чому зупинились");
+   - where we stopped (section "Where we stopped");
    - the current checklist: done / left, ⭐ items first;
    - ONE next step: the first unfinished ⭐ item, in natural order;
-   - what to read in the manual before it (table "Порядок читання мануалу"), if it applies.
+   - what to read in the manual before it (table "Manual reading order"), if it applies.
 3. Check the git state: current branch, uncommitted changes. Point out any mismatch
    with the journal (e.g. the journal says "on main", but you're on a feature branch).
 4. Don't start the next step — wait for the user.
@@ -38,7 +38,7 @@ PROGRESS.md is the user's local learning journal. It is in .gitignore — never 
 
 1. Gather what happened: this conversation, `git log` since the last update, `git status`.
 2. Propose edits to PROGRESS.md as a diff, following "What PROGRESS.md is":
-   - "На чому зупинились": the current learning step + the next one;
+   - "Where we stopped": the current learning step + the next one;
    - lessons learned this session — short, one line each;
    - learning plan / checklist: tick finished learning items.
 3. Only facts from this session — no plans the user didn't agree to.
