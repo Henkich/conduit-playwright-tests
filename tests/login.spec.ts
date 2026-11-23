@@ -1,4 +1,3 @@
-// Login tests
 import { test, expect } from '../fixtures';
 import { generateEmail } from '../helpers/data';
 import { GUEST } from '../helpers/auth';

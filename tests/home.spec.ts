@@ -12,7 +12,7 @@ test.describe('Home page', () => {
     await allure.epic(EPIC.articles);
   });
 
-  test('Main Page has logo and Global Feed', async ({ homePage, navbar }) => {
+  test('shows the logo and Global Feed', async ({ homePage, navbar }) => {
     await allure.feature(FEATURE.articleList);
     await allure.severity(allure.Severity.MINOR);
     await homePage.open();
@@ -21,19 +21,23 @@ test.describe('Home page', () => {
     await expect(homePage.globalFeedTab).toBeVisible();
   });
 
-  test('MOCKED: Empty Articles list', { tag: '@mock' }, async ({ homePage, page }) => {
-    await allure.feature(FEATURE.articleList);
-    await allure.severity(allure.Severity.NORMAL);
-    await page.route('**/api/articles*', async (route) => {
-      await route.fulfill({ json: { articles: [], articlesCount: 0 } });
-    });
-    await homePage.open();
+  test(
+    'shows empty state when there are no articles',
+    { tag: '@mock' },
+    async ({ homePage, page }) => {
+      await allure.feature(FEATURE.articleList);
+      await allure.severity(allure.Severity.NORMAL);
+      await page.route('**/api/articles*', async (route) => {
+        await route.fulfill({ json: { articles: [], articlesCount: 0 } });
+      });
+      await homePage.open();
 
-    await expect(homePage.noArticlesMessage).toBeVisible();
-  });
+      await expect(homePage.noArticlesMessage).toBeVisible();
+    },
+  );
 
   test(
-    'MOCKED: 500 error message when articles request fails',
+    'shows a message when the articles request returns 500',
     { tag: '@mock' },
     async ({ homePage, page }) => {
       await allure.feature(FEATURE.articleList);
@@ -47,7 +51,7 @@ test.describe('Home page', () => {
     },
   );
 
-  test('MOCKED: Empty tags', { tag: '@mock' }, async ({ homePage, page }) => {
+  test('shows empty state when there are no tags', { tag: '@mock' }, async ({ homePage, page }) => {
     await allure.feature(FEATURE.tags);
     await allure.severity(allure.Severity.NORMAL);
     await page.route('**/api/tags*', async (route) => {
@@ -55,11 +59,11 @@ test.describe('Home page', () => {
     });
     await homePage.open();
 
-    await expect(homePage.noTagsMessages).toBeVisible();
+    await expect(homePage.noTagsMessage).toBeVisible();
   });
 
   test(
-    'MOCKED: 500 error message when tags request fails',
+    'shows a message when the tags request returns 500',
     { tag: '@mock' },
     async ({ homePage, page }) => {
       await allure.feature(FEATURE.tags);
@@ -69,29 +73,33 @@ test.describe('Home page', () => {
       });
       await homePage.open();
 
-      await expect(homePage.noTagsMessages).toBeVisible();
+      await expect(homePage.noTagsMessage).toBeVisible();
     },
   );
 
-  test('MOCKED: Network abort with tags request', { tag: '@mock' }, async ({ homePage, page }) => {
-    await allure.feature(FEATURE.tags);
-    await allure.severity(allure.Severity.NORMAL);
-    test.fail(true, 'BUG: Full empty page');
-    await page.route('**/api/tags*', async (route) => {
-      await route.abort();
-    });
-    await homePage.open();
+  test(
+    'shows a message when the tags request is aborted',
+    { tag: '@mock' },
+    async ({ homePage, page }) => {
+      await allure.feature(FEATURE.tags);
+      await allure.severity(allure.Severity.NORMAL);
+      test.fail(true, 'BUG: the whole page is empty when the request is aborted');
+      await page.route('**/api/tags*', async (route) => {
+        await route.abort();
+      });
+      await homePage.open();
 
-    await expect(homePage.noTagsMessages).toBeVisible();
-  });
+      await expect(homePage.noTagsMessage).toBeVisible();
+    },
+  );
 
   test(
-    'MOCKED: Network abort with Articles request',
+    'shows a message when the articles request is aborted',
     { tag: '@mock' },
     async ({ homePage, page }) => {
       await allure.feature(FEATURE.articleList);
       await allure.severity(allure.Severity.NORMAL);
-      test.fail(true, 'BUG: Full empty page');
+      test.fail(true, 'BUG: the whole page is empty when the request is aborted');
       await page.route('**/api/articles*', async (route) => {
         await route.abort();
       });
@@ -102,7 +110,7 @@ test.describe('Home page', () => {
   );
 
   test(
-    'MOCKED: Pagination respond articles amount',
+    'shows as many pages as articlesCount needs',
     { tag: '@mock' },
     async ({ homePage, page, user, request }) => {
       await allure.feature(FEATURE.articleList);
@@ -124,7 +132,7 @@ test.describe('Home page', () => {
   );
 
   test(
-    'MOCKED: Loader is shown while articles are loading',
+    'shows a loader while articles are loading',
     { tag: '@mock' },
     async ({ homePage, page }) => {
       await allure.feature(FEATURE.articleList);
@@ -143,43 +151,39 @@ test.describe('Home page', () => {
     },
   );
 
-  test(
-    "MOCKED: Real possible valid article's data",
-    { tag: '@mock' },
-    async ({ homePage, page }) => {
-      await allure.feature(FEATURE.articleList);
-      await allure.severity(allure.Severity.NORMAL);
-      const { body, ...articleData } = createArticleData();
-      const article = {
-        slug: generateArticleName(),
-        ...articleData,
-        createdAt: '2026-11-18T12:00:43.239Z',
-        updatedAt: '2026-11-18T12:00:43.259Z',
-        favorited: false,
-        favoritesCount: 42,
-        author: {
-          username: generateUsername(),
-          bio: null,
-          image: null,
-          following: false,
-        },
-      };
-      await page.route('**/api/articles*', async (route) => {
-        await route.fulfill({ json: { articles: [article], articlesCount: 1 } });
-      });
-      await homePage.open();
+  test('shows article preview data from the API', { tag: '@mock' }, async ({ homePage, page }) => {
+    await allure.feature(FEATURE.articleList);
+    await allure.severity(allure.Severity.NORMAL);
+    const { body, ...articleData } = createArticleData();
+    const article = {
+      slug: generateArticleName(),
+      ...articleData,
+      createdAt: '2026-11-18T12:00:43.239Z',
+      updatedAt: '2026-11-18T12:00:43.259Z',
+      favorited: false,
+      favoritesCount: 42,
+      author: {
+        username: generateUsername(),
+        bio: null,
+        image: null,
+        following: false,
+      },
+    };
+    await page.route('**/api/articles*', async (route) => {
+      await route.fulfill({ json: { articles: [article], articlesCount: 1 } });
+    });
+    await homePage.open();
 
-      await expect(homePage.authorUsername).toHaveText(article.author.username);
-      await expect(homePage.articleDescription).toHaveText(article.description);
-      await expect(homePage.articleTitle).toHaveText(article.title);
-      await expect(homePage.articleLikes).toContainText(`${article.favoritesCount}`);
-      await expect(homePage.articleDate).toHaveText('November 18, 2026');
-      await expect(homePage.articleTags).toHaveText(article.tagList);
-    },
-  );
+    await expect(homePage.authorUsername).toHaveText(article.author.username);
+    await expect(homePage.articleDescription).toHaveText(article.description);
+    await expect(homePage.articleTitle).toHaveText(article.title);
+    await expect(homePage.articleLikes).toContainText(`${article.favoritesCount}`);
+    await expect(homePage.articleDate).toHaveText('November 18, 2026');
+    await expect(homePage.articleTags).toHaveText(article.tagList);
+  });
 
   test(
-    'MOCKED: Click on popular tag sends request with this tag',
+    'clicking a popular tag requests articles with that tag',
     { tag: '@mock' },
     async ({ homePage, page }) => {
       await allure.feature(FEATURE.tags);
@@ -197,12 +201,7 @@ test.describe('Home page', () => {
     },
   );
 
-  test('Corresponded Article appears after click on the tag', async ({
-    homePage,
-    page,
-    user,
-    request,
-  }) => {
+  test('clicking a popular tag shows its articles', async ({ homePage, page, user, request }) => {
     await allure.feature(FEATURE.tags);
     await allure.severity(allure.Severity.CRITICAL);
     const article = await createArticle(request, user.token);

@@ -10,7 +10,7 @@ test.describe('GET /api/profiles/:username', () => {
     await allure.feature(FEATURE.profile);
   });
 
-  test('Return user profile from unauthorized user', async ({ request, user }) => {
+  test('returns a profile without token', async ({ request, user }) => {
     await allure.severity(allure.Severity.CRITICAL);
     const response = await request.get(`/api/profiles/${user.username}`);
 
@@ -27,7 +27,7 @@ test.describe('GET /api/profiles/:username', () => {
     });
   });
 
-  test('Return unexisted user profile from unauthorized user', async ({ request }) => {
+  test('returns 404 for an unknown username', async ({ request }) => {
     await allure.severity(allure.Severity.NORMAL);
     const response = await request.get(`/api/profiles/${generateUsername()}`);
 
@@ -44,7 +44,7 @@ test.describe('POST/DELETE /api/profiles/:username/follow', () => {
     await allure.feature(FEATURE.follow);
   });
 
-  test('Follow the user', async ({ request, user }) => {
+  test('follows a user', async ({ request, user }) => {
     await allure.severity(allure.Severity.CRITICAL);
     const follower = await createUser(request);
     const response = await request.post(`/api/profiles/${user.username}/follow`, {
@@ -63,13 +63,13 @@ test.describe('POST/DELETE /api/profiles/:username/follow', () => {
         followersCount: 1,
       },
     });
-    const response2 = await request.get(`/api/profiles/${user.username}`, {
+    const getResponse = await request.get(`/api/profiles/${user.username}`, {
       headers: { Authorization: `Token ${follower.token}` },
     });
-    expect(response2.status()).toBe(200);
-    const json2 = await response2.json();
+    expect(getResponse.status()).toBe(200);
+    const getJson = await getResponse.json();
 
-    expect(json2).toMatchObject({
+    expect(getJson).toMatchObject({
       profile: {
         username: user.username,
         following: true,
@@ -79,7 +79,7 @@ test.describe('POST/DELETE /api/profiles/:username/follow', () => {
     });
   });
 
-  test('UnFollow the user', async ({ request, user }) => {
+  test('unfollows a user', async ({ request, user }) => {
     await allure.severity(allure.Severity.NORMAL);
     const follower = await createUser(request);
     const response = await request.post(`/api/profiles/${user.username}/follow`, {
@@ -98,13 +98,13 @@ test.describe('POST/DELETE /api/profiles/:username/follow', () => {
         followersCount: 1,
       },
     });
-    const response2 = await request.delete(`/api/profiles/${user.username}/follow`, {
+    const unfollowResponse = await request.delete(`/api/profiles/${user.username}/follow`, {
       headers: { Authorization: `Token ${follower.token}` },
     });
-    expect(response2.status()).toBe(200);
-    const json2 = await response2.json();
+    expect(unfollowResponse.status()).toBe(200);
+    const unfollowJson = await unfollowResponse.json();
 
-    expect(json2).toMatchObject({
+    expect(unfollowJson).toMatchObject({
       profile: {
         username: user.username,
         following: false,
@@ -115,7 +115,7 @@ test.describe('POST/DELETE /api/profiles/:username/follow', () => {
     });
   });
 
-  test('Follow the user without login', async ({ request, user }) => {
+  test('returns 401 without token', async ({ request, user }) => {
     await allure.severity(allure.Severity.NORMAL);
     const response = await request.post(`/api/profiles/${user.username}/follow`);
 
