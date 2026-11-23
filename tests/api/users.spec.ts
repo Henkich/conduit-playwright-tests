@@ -1,6 +1,6 @@
 import { test, expect } from '../../fixtures';
 import { createUserData } from '../../helpers/api';
-import { generateUsername } from '../../helpers/data';
+import { generateEmail, generateUsername } from '../../helpers/data';
 import * as allure from 'allure-js-commons';
 import { EPIC, FEATURE } from '../../helpers/allure';
 
@@ -30,18 +30,20 @@ test.describe('POST /api/users/login', () => {
     });
   });
 
-  test('Unexisted email', async ({ request, user }) => {
+  // Same response as for a wrong password, so the API doesn't reveal which emails are registered
+  test('returns the same error for an unknown email as for a wrong password', async ({
+    request,
+    user,
+  }) => {
     await allure.severity(allure.Severity.NORMAL);
-    test.fail(true, 'Unexisted email return 404 instead of 422');
+    test.fail(true, 'BUG: returns 404 "Email not found sign in first" (user enumeration)');
     const response = await request.post('/api/users/login', {
-      data: { user: { email: '234@56234', password: user.password } },
+      data: { user: { email: generateEmail(), password: user.password } },
     });
-    expect(response.status()).toBe(422);
-    const json = await response.json();
 
-    expect(json.errors).toBeDefined();
-    expect(json).toEqual({
-      errors: { body: ['Email not found sign in first'] },
+    expect(response.status()).toBe(401);
+    expect(await response.json()).toEqual({
+      errors: { body: ['Wrong email/password combination'] },
     });
   });
 
