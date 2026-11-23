@@ -42,8 +42,16 @@ test.describe('Article', () => {
   test('user can publish article without tags', async ({ editorPage, page }) => {
     await allure.severity(allure.Severity.NORMAL);
     const article = createArticleData({ tagList: [] });
+
+    const responsePromise = page.waitForResponse(
+      (res) => res.url().endsWith('/api/articles') && res.request().method() === 'POST',
+    );
     await editorPage.publish(article);
-    await expect(page).toHaveURL(`/#/article/${article.title.toLowerCase()}`);
+
+    const response = await responsePromise;
+    const json = await response.json();
+
+    await expect(page).toHaveURL(`/#/article/${json.article.slug}`);
     await expect(page.getByRole('heading', { name: article.title })).toBeVisible();
   });
 
@@ -63,8 +71,16 @@ test.describe('Article', () => {
     await allure.severity(allure.Severity.NORMAL);
     const title = generateArticleName();
     const article = createArticleData({ title: title });
+
+    const responsePromise = page.waitForResponse(
+      (res) => res.url().endsWith('/api/articles') && res.request().method() === 'POST',
+    );
     await editorPage.publish(article);
-    await expect(page).toHaveURL(`/#/article/${article.title.toLowerCase()}`);
+
+    const response = await responsePromise;
+    const json = await response.json();
+
+    await expect(page).toHaveURL(`/#/article/${json.article.slug}`);
     await expect(page.getByRole('heading', { name: article.title })).toBeVisible();
 
     await editorPage.open();
