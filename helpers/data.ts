@@ -1,22 +1,25 @@
+// Unique values per call, so parallel tests never collide on titles, emails or usernames
 export function uniqueId(): string {
   return `${Date.now()}${Math.floor(Math.random() * 1000)}`;
 }
+
 export function generateArticleName(): string {
-  const ArticleName = `Article${uniqueId()}`;
-  return ArticleName;
+  return `Article${uniqueId()}`;
 }
+
 export function generateArticleDescription(): string {
-  const ArticleDescription = `ArticleDescription${uniqueId()}`;
-  return ArticleDescription;
+  return `ArticleDescription${uniqueId()}`;
 }
+
 export function generateArticleBody(): string {
-  const ArticleBody = `ArticleBody${uniqueId()}`;
-  return ArticleBody;
+  return `ArticleBody${uniqueId()}`;
 }
+
 export function generateTag(): string {
-  const tag = `tag${uniqueId()}`;
-  return tag;
+  return `tag${uniqueId()}`;
 }
+
+// 2–4 unique tags
 export function generateArticleTags(): string[] {
   const count = 2 + Math.floor(Math.random() * 3);
   const tags: string[] = [];
@@ -25,11 +28,11 @@ export function generateArticleTags(): string[] {
   }
   return tags;
 }
+
 export function generateEmail(): string {
-  const username = `user${uniqueId()}`;
-  return `${username}@example.com`;
+  return `user${uniqueId()}@example.com`;
 }
+
 export function generateUsername(): string {
-  const username = `user${uniqueId()}`;
-  return username;
+  return `user${uniqueId()}`;
 }
