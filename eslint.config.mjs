@@ -8,6 +8,7 @@ export default defineConfig(
   {
     ignores: [
       'playwright-report/',
+      'playwright-report-visual/',
       'test-results/',
       'playwright/',
       'allure-report/',
