@@ -52,4 +52,9 @@ export default defineConfig(
   },
   // .mjs files are Node scripts (e.g. Claude Code hooks): process, console, etc.
   { files: ['**/*.mjs'], languageOptions: { globals: globals.node } },
+  // k6 load scripts run in the k6 runtime, not Node: __ENV, __VU and __ITER are k6 globals
+  {
+    files: ['load/**/*.js'],
+    languageOptions: { globals: { __ENV: 'readonly', __VU: 'readonly', __ITER: 'readonly' } },
+  },
 );

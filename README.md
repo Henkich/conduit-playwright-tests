@@ -51,6 +51,7 @@ npm test
 | ---------------------------- | ----------------------------------------------- |
 | `npm test`                   | run all tests except visual                     |
 | `npm run test:api`           | run only API tests                              |
+| `npm run load`               | k6 load test of the article list (smoke)        |
 | `npm run test:visual`        | run visual tests in the Playwright Docker image |
 | `npm run test:visual:update` | regenerate visual baselines (check them!)       |
 | `npm run test:ui`            | open Playwright UI mode                         |
@@ -67,6 +68,12 @@ Visual tests (`@visual`) compare screenshots with committed baselines. Rendering
 operating systems, so the baselines are Linux-only and the tests always run in the official
 Playwright Docker image (Docker must be running), locally and in CI.
 
+Load tests use [k6](https://grafana.com/docs/k6/latest/) (install it separately) and run only on demand,
+not in CI: shared runners are too noisy for meaningful timings. Scenarios in `load/` describe what
+a user does; `load/profiles.js` defines how much load and the pass/fail thresholds. `npm run load`
+is a smoke run; pick another profile with `npm run load -- -e PROFILE=<name>`: `load`, `stress`,
+`spike` or `soak`.
+
 ## Project structure
 
 ```
@@ -75,6 +82,7 @@ tests/api/      API specs (no browser)
 pages/          Page Objects: locators and user actions, no assertions
 fixtures/       custom fixtures: page objects, an API-created user and article
 helpers/        API helpers, test data generators, auth state, Allure labels
+load/           k6 scenarios and load profiles
 docs/           RealWorld OpenAPI spec used as the API contract
 .github/        CI workflow
 ```

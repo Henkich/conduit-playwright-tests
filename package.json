@@ -14,6 +14,8 @@
     "typecheck": "tsc",
     "check": "npm run format:check && npm run lint && npm run typecheck",
     "test:api": "playwright test --project=api",
+    "load:browse": "k6 run load/articles.js",
+    "load:publish": "k6 run load/publish-article.js",
     "test:visual": "node scripts/test-visual.mjs",
     "test:visual:update": "node scripts/test-visual.mjs --update-snapshots",
     "allure:generate": "allure generate allure-results --clean",
