@@ -13,6 +13,7 @@ export class HomePage extends BasePage {
   readonly articleTags: Locator;
   readonly articleDate: Locator;
   readonly articleLikes: Locator;
+  readonly popularTags: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -28,6 +29,7 @@ export class HomePage extends BasePage {
     this.articleTags = articlePreview.getByRole('listitem');
     this.articleDate = articlePreview.locator('.date');
     this.articleLikes = articlePreview.getByRole('button');
+    this.popularTags = page.locator('.sidebar').getByRole('button');
   }
 
   async open() {
