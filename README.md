@@ -47,19 +47,25 @@ npm test
 
 ## Scripts
 
-| Command                   | What it does                                    |
-| ------------------------- | ----------------------------------------------- |
-| `npm test`                | run all tests                                   |
-| `npm run test:api`        | run only API tests                              |
-| `npm run test:ui`         | open Playwright UI mode                         |
-| `npm run check`           | Prettier check + ESLint + TypeScript type check |
-| `npm run format`          | format all files with Prettier                  |
-| `npm run report`          | open the HTML report of the last run            |
-| `npm run allure:generate` | build the Allure report from the last run       |
-| `npm run allure:open`     | open the Allure report                          |
+| Command                      | What it does                                    |
+| ---------------------------- | ----------------------------------------------- |
+| `npm test`                   | run all tests except visual                     |
+| `npm run test:api`           | run only API tests                              |
+| `npm run test:visual`        | run visual tests in the Playwright Docker image |
+| `npm run test:visual:update` | regenerate visual baselines (check them!)       |
+| `npm run test:ui`            | open Playwright UI mode                         |
+| `npm run check`              | Prettier check + ESLint + TypeScript type check |
+| `npm run format`             | format all files with Prettier                  |
+| `npm run report`             | open the HTML report of the last run            |
+| `npm run allure:generate`    | build the Allure report from the last run       |
+| `npm run allure:open`        | open the Allure report                          |
 
 Run a subset by tag: `npx playwright test --grep @mock` (mocked network) or `--grep @a11y`
 (accessibility).
+
+Visual tests (`@visual`) compare screenshots with committed baselines. Rendering differs between
+operating systems, so the baselines are Linux-only and the tests always run in the official
+Playwright Docker image (Docker must be running), locally and in CI.
 
 ## Project structure
 
@@ -89,4 +95,5 @@ Playwright projects: `setup` (login), `chromium` (UI tests, depend on `setup`), 
 ## CI
 
 Every push to `main` and every pull request: code checks, then the app is started in Docker and
-the full suite runs. The Playwright HTML and Allure reports are uploaded as workflow artifacts.
+the full suite runs, then the visual tests run in the Playwright Docker image. The Playwright HTML
+reports (main and visual) and the Allure report are uploaded as workflow artifacts.

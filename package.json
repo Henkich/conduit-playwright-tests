@@ -5,7 +5,7 @@
   "description": "Playwright UI and API tests for Conduit (RealWorld example app)",
   "scripts": {
     "pretest": "node -e \"require('fs').rmSync('allure-results', { recursive: true, force: true })\"",
-    "test": "playwright test",
+    "test": "playwright test --grep-invert @visual",
     "test:ui": "playwright test --ui",
     "report": "playwright show-report",
     "lint": "eslint .",
@@ -14,6 +14,8 @@
     "typecheck": "tsc",
     "check": "npm run format:check && npm run lint && npm run typecheck",
     "test:api": "playwright test --project=api",
+    "test:visual": "node scripts/test-visual.mjs",
+    "test:visual:update": "node scripts/test-visual.mjs --update-snapshots",
     "allure:generate": "allure generate allure-results --clean",
     "allure:open": "allure open allure-report"
   },

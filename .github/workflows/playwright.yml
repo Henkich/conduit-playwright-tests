@@ -46,6 +46,19 @@ jobs:
       - name: Run tests
         run: npm test
 
+      # Inside the Playwright Docker image: the same rendering as the committed Linux baselines
+      - name: Run visual tests
+        if: ${{ !cancelled() }}
+        run: npm run test:visual
+
+      - name: Upload visual report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-visual
+          path: playwright-report-visual/
+          retention-days: 14
+
       - name: Upload report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
